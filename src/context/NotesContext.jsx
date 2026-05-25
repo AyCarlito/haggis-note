@@ -50,11 +50,9 @@ export function NotesProvider({ children, data, updateData }) {
   }, [updateData])
 
   const addFolder = useCallback(() => {
-    const name = prompt('Folder name:')
-    if (!name || !name.trim()) return
-    const folder = { id: uid(), name: name.trim(), collapsed: true, notes: [] }
+    const folder = { id: uid(), name: 'Untitled', collapsed: true, notes: [] }
     updateData((prev) => ({ ...prev, folders: [...prev.folders, folder] }))
-    announce(`Created folder "${folder.name}"`)
+    announce('Created folder "Untitled"')
   }, [updateData, announce])
 
   const renameFolder = useCallback((folderId, name) => {
