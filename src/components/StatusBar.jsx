@@ -1,0 +1,27 @@
+import { useState, useEffect } from 'react'
+import { useNotes } from '../context/NotesContext'
+
+export default function StatusBar() {
+  const { selectedNote } = useNotes()
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    if (!selectedNote) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVisible(true)
+    const timer = setTimeout(() => setVisible(false), 2000)
+    return () => clearTimeout(timer)
+  }, [selectedNote?.updatedAt, selectedNote])
+
+  return (
+    <footer className="h-7 shrink-0 flex items-center px-4 text-xs text-status-fg glass border-t border-white/20">
+      {selectedNote ? (
+        <span>
+          {visible ? 'Saved' : `${selectedNote.updatedAt ? new Date(selectedNote.updatedAt).toLocaleString() : ''}`}
+        </span>
+      ) : (
+        <span>No note selected</span>
+      )}
+    </footer>
+  )
+}
