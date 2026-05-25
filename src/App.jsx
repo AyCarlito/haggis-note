@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useStorage } from './hooks/useStorage'
 import { NotesProvider } from './context/NotesContext'
 import Header from './components/Header'
@@ -10,8 +11,6 @@ import ContextMenu from './components/ContextMenu'
 
 import { useNotes } from './context/NotesContext'
 
-// Screen-reader live region that announces folder/note create, delete, and
-// move actions. Visually hidden — Tailwind sr-only keeps it accessible.
 function AriaLive() {
   const { announcement } = useNotes()
   return (
@@ -41,14 +40,38 @@ export default function App() {
     notes: [],
   })
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile)
+  const toggleSidebar = () => setSidebarOpen((v) => !v)
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && sidebarOpen && window.innerWidth < 768) {
+        setSidebarOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [sidebarOpen])
+
   return (
     <NotesProvider data={data} updateData={updateData}>
       <div className="h-screen flex flex-col">
         <StorageWarning isLow={isLow} usage={storageUsage} />
-        <Header />
+        <Header sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} />
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
-          <EditorArea />
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 z-20 bg-black/30 md:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+          <div className={`fixed inset-y-0 left-0 z-30 w-72 transition-all duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:z-auto md:translate-x-0 ${sidebarOpen ? '' : 'md:w-0 md:overflow-hidden'}`}>
+            <Sidebar />
+          </div>
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <EditorArea />
+          </div>
         </div>
         <StatusBar />
       </div>
