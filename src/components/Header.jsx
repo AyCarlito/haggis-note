@@ -4,19 +4,19 @@ export default function Header() {
   const { addFolder, addNote } = useNotes()
 
   return (
-    <header className="flex items-center justify-between h-14 px-4 bg-sidebar-bg text-sidebar-fg border-b border-sidebar-border shrink-0">
-      <h1 className="text-lg font-semibold tracking-tight">HaggisNote</h1>
+    <header className="flex items-center justify-between h-14 px-4 shrink-0 bg-gradient-to-r from-[#232544] via-[#2a2b4e] to-[#232544] text-sidebar-fg border-b border-sidebar-border">
+      <h1 className="text-xl font-semibold tracking-tight">HaggisNote</h1>
       <div className="flex gap-2">
         <button
           onClick={addNote}
-          className="px-3 py-1.5 text-sm rounded bg-accent text-white hover:bg-accent-hover transition-colors"
+          className="px-4 py-1.5 text-sm rounded-full bg-accent/90 text-white hover:bg-accent-hover transition-colors shadow-sm"
           aria-label="New note"
         >
           + Note
         </button>
         <button
           onClick={addFolder}
-          className="px-3 py-1.5 text-sm rounded border border-sidebar-border text-sidebar-fg hover:bg-gray-700 transition-colors"
+          className="px-4 py-1.5 text-sm rounded-full border border-white/10 bg-white/5 text-sidebar-fg hover:bg-white/10 transition-colors"
           aria-label="New folder"
         >
           + Folder

@@ -37,29 +37,29 @@ export default function DeleteConfirmDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-overlay"
+      className="fixed inset-0 z-50 flex items-center justify-center overlay-blur"
       role="dialog"
       aria-modal="true"
       aria-label="Confirm deletion"
       onClick={cancelDelete}
     >
       <div
-        className="bg-white rounded-lg shadow-xl p-6 mx-4 max-w-sm w-full"
+        className="bg-white/90 backdrop-blur-xl rounded-xl shadow-2xl p-6 mx-4 max-w-sm w-full border border-white/30"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-sm text-gray-700 mb-5">{label}</p>
+        <p className="text-sm text-gray-800 mb-5">{label}</p>
         <p className="text-xs text-gray-500 mb-4">This action cannot be undone.</p>
         <div className="flex justify-end gap-3">
           <button
             onClick={cancelDelete}
-            className="px-4 py-2 text-sm rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 transition-colors"
           >
             Cancel
           </button>
           <button
             ref={confirmRef}
             onClick={confirmDelete}
-            className="px-4 py-2 text-sm rounded bg-danger text-white hover:bg-danger-hover transition-colors"
+            className="px-4 py-2 text-sm rounded-lg bg-danger text-white hover:bg-danger-hover transition-colors"
           >
             Delete
           </button>

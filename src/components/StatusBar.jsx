@@ -13,7 +13,7 @@ export default function StatusBar() {
   }, [selectedNote?.updatedAt])
 
   return (
-    <footer className="h-7 shrink-0 flex items-center px-4 text-xs text-status-fg bg-status-bg border-t border-toolbar-border">
+    <footer className="h-7 shrink-0 flex items-center px-4 text-xs text-status-fg glass border-t border-white/20">
       {selectedNote ? (
         <span>
           {visible ? 'Saved' : `${selectedNote.updatedAt ? new Date(selectedNote.updatedAt).toLocaleString() : ''}`}

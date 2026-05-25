@@ -78,8 +78,10 @@ export default function FolderItem({ folder, index }) {
         >
           <div
             {...provided.dragHandleProps}
-            className={`group flex items-center gap-1 px-2 py-2 rounded text-sm cursor-pointer transition-colors ${
-              isSelected ? 'bg-gray-700 text-sidebar-fg' : 'text-gray-300 hover:bg-gray-700'
+            className={`group flex items-center gap-1.5 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
+              isSelected
+                ? 'text-sidebar-fg bg-white/[0.06] border-l-2 border-accent pl-[10px]'
+                : 'text-gray-300 hover:bg-white/[0.04]'
             } ${snapshot.isDragging ? 'opacity-50' : ''}`}
             tabIndex={0}
             onClick={handleToggle}
@@ -151,8 +153,8 @@ export default function FolderItem({ folder, index }) {
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={`ml-3 pl-2 border-l border-gray-600 min-h-[4px] transition-colors ${
-                    snapshot.isDraggingOver ? 'border-accent bg-gray-800 rounded' : ''
+                  className={`ml-3 pl-2 border-l border-white/10 min-h-[4px] transition-colors ${
+                    snapshot.isDraggingOver ? 'border-accent bg-white/[0.04] rounded' : ''
                   }`}
                   role="group"
                   aria-label={`Notes in ${folder.name}`}

@@ -52,12 +52,12 @@ export default function NoteItem({ note, folderId, index }) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`group flex items-center gap-1 px-2 py-1.5 rounded text-sm cursor-pointer transition-colors ${
+          className={`group flex items-center gap-1.5 px-3 py-1.5 rounded text-sm cursor-pointer transition-colors ${
             isSelected
-              ? 'bg-accent text-white'
+              ? 'text-accent bg-accent/10 border-l-2 border-accent pl-[10px]'
               : snapshot.isDragging
-                ? 'bg-gray-700 text-sidebar-fg shadow-lg'
-                : 'text-gray-300 hover:bg-gray-700'
+                ? 'text-sidebar-fg bg-white/10 shadow-xl rotate-[0.5deg]'
+                : 'text-gray-300 hover:bg-white/[0.04]'
           }`}
           style={{ ...provided.draggableProps.style }}
           role="treeitem"
