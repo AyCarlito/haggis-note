@@ -25,7 +25,7 @@ export default function HelpDialog({ onClose }) {
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="glass rounded-xl p-6 max-w-lg w-full mx-4 border border-white/20 shadow-xl outline-none"
+        className="bg-white rounded-xl p-6 max-w-lg w-full mx-4 border border-gray-200 shadow-xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -55,6 +55,7 @@ export default function HelpDialog({ onClose }) {
               <li><strong>Edit</strong> - Click a note in the sidebar to open it in the editor</li>
               <li><strong>Format</strong> - Use the toolbar above the editor for bold, italic, headings, and more</li>
               <li><strong>Link notes</strong> - Select text, click the link icon, then enter a web address or search for a note to link to</li>
+              <li><strong>Toggle sidebar</strong> - Click the hamburger menu icon in the header to show or hide the sidebar, giving you more room to edit</li>
               <li><strong>Drag and drop</strong> - Reorder notes and folders in the sidebar</li>
               <li><strong>Multi-select</strong> - Ctrl+Click to toggle, Shift+Click to select a range</li>
               <li><strong>Search</strong> - Press Ctrl+F to find notes by name</li>
@@ -67,7 +68,7 @@ export default function HelpDialog({ onClose }) {
               <li><strong>Ctrl+F</strong> - Search notes (when no note is focused)</li>
               <li><strong>Ctrl+Shift+&gt;</strong> - Increase font size</li>
               <li><strong>Ctrl+Shift+&lt;</strong> - Decrease font size</li>
-              <li><strong>Esc</strong> - Close dialogs / clear search</li>
+              <li><strong>Esc</strong> - Close dialogs / clear search / close sidebar on mobile</li>
             </ul>
           </div>
 

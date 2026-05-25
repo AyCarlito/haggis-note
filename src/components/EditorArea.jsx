@@ -35,7 +35,7 @@ export default function EditorArea() {
     shouldRerenderOnTransaction: true,
     editorProps: {
       attributes: {
-        class: 'flex-1 p-4 w-full outline-none text-gray-900 bg-white',
+        class: 'flex-1 p-4 max-md:p-3 w-full outline-none text-gray-900 bg-white',
       },
       handleKeyDown: (view, event) => {
         const isMod = event.ctrlKey || event.metaKey
@@ -87,7 +87,7 @@ export default function EditorArea() {
   if (isMultiSelecting) {
     return (
       <main className="flex-1 flex items-center justify-center bg-editor-bg editor-grid text-gray-400">
-        <div className="text-center glass rounded-xl px-10 py-12 border border-white/30 shadow-sm">
+        <div className="text-center glass rounded-xl px-10 max-md:px-6 py-12 max-md:py-8 border border-white/30 shadow-sm">
           <p className="text-lg font-medium text-gray-600">Multiple items selected</p>
           <p className="text-sm mt-1 text-gray-400">
             Use the sidebar to perform bulk actions.
@@ -100,11 +100,11 @@ export default function EditorArea() {
   if (!selectedNote) {
     return (
       <main className="flex-1 flex items-center justify-center bg-editor-bg editor-grid text-gray-400">
-        <div className="text-center glass rounded-xl px-10 py-12 border border-white/30 shadow-sm">
+        <div className="text-center glass rounded-xl px-10 max-md:px-6 py-12 max-md:py-8 border border-white/30 shadow-sm">
           <img
             src={haggisLogo}
             alt=""
-            className="mx-auto mb-5 h-24 w-24 rounded-2xl object-cover shadow-md"
+            className="mx-auto mb-5 h-24 w-24 max-md:h-16 max-md:w-16 rounded-2xl object-cover shadow-md"
           />
           <p className="text-lg font-medium text-gray-600">Select a note to start editing</p>
           <p className="text-sm mt-1 text-gray-400">Choose a note from the sidebar, or create a new one.</p>
