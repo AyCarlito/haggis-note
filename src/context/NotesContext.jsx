@@ -14,9 +14,14 @@ export function NotesProvider({ children, data, updateData }) {
   const [selectedNoteId, setSelectedNoteId] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [renameTarget, setRenameTarget] = useState(null)
+
+  // Holds the current screen-reader announcement string. Cleared after 3s so
+  // repeated identical announcements re-trigger the aria-live region in App.jsx.
   const [announcement, setAnnouncement] = useState('')
   const announceTimerRef = useRef(null)
 
+  // Sets announcement and schedules a clear so a new message always differs
+  // from the previous one, forcing screen-reader re-announcement.
   const announce = useCallback((msg) => {
     if (announceTimerRef.current) clearTimeout(announceTimerRef.current)
     setAnnouncement(msg)
@@ -40,6 +45,9 @@ export function NotesProvider({ children, data, updateData }) {
     setSelectedNoteId(noteId)
   }, [])
 
+  // Persists folder collapse state in localStorage (via updateData) so
+  // expanded/collapsed survives page reloads. Previously this used an
+  // in-memory Set that reset on every load.
   const toggleExpanded = useCallback((folderId) => {
     updateData((prev) => ({
       ...prev,
@@ -49,6 +57,8 @@ export function NotesProvider({ children, data, updateData }) {
     }))
   }, [updateData])
 
+  // Creates a folder named "Untitled" without prompting, matching the new-note
+  // behaviour so both buttons feel consistent. Rename via double-click.
   const addFolder = useCallback(() => {
     const folder = { id: uid(), name: 'Untitled', collapsed: true, notes: [] }
     updateData((prev) => ({ ...prev, folders: [...prev.folders, folder] }))
@@ -62,6 +72,9 @@ export function NotesProvider({ children, data, updateData }) {
     }))
   }, [updateData])
 
+  // Creates a new "Untitled" note in the given folder. Exists as a separate
+  // action from addNote so the sidebar per-folder "+" button can target a
+  // specific folder without changing the global selection.
   const addNoteToFolder = useCallback((folderId) => {
     updateData((prev) => {
       const now = new Date().toISOString()
@@ -76,6 +89,8 @@ export function NotesProvider({ children, data, updateData }) {
     announce('Created note "Untitled"')
   }, [updateData, announce])
 
+  // Default add-note entry point used by the header button. Targets the
+  // currently selected folder, falling back to the first folder.
   const addNote = useCallback(() => {
     const targetId = selectedFolderId || folders[0]?.id
     if (!targetId) return
@@ -148,13 +163,16 @@ export function NotesProvider({ children, data, updateData }) {
     [updateData, folders, announce],
   )
 
+  // Reorders the folders array for folder drag-and-drop in the sidebar.
+  // Separate from moveNote because folders have no nested structure to
+  // transfer between — just a position swap within a single flat list.
   const moveFolder = useCallback((folderId, sourceIdx, destIdx) => {
     const folder = folders.find((f) => f.id === folderId)
     updateData((prev) => {
-      const folders = [...prev.folders]
-      const [f] = folders.splice(sourceIdx, 1)
-      folders.splice(destIdx, 0, f)
-      return { ...prev, folders }
+      const newFolders = [...prev.folders]
+      const [f] = newFolders.splice(sourceIdx, 1)
+      newFolders.splice(destIdx, 0, f)
+      return { ...prev, folders: newFolders }
     })
     if (folder) announce(`Moved folder "${folder.name}"`)
   }, [updateData, folders, announce])
@@ -167,6 +185,9 @@ export function NotesProvider({ children, data, updateData }) {
     setDeleteTarget(null)
   }, [])
 
+  // Announces the deletion result so screen-reader users get feedback after
+  // confirming the dialog. The announce call runs after the delete callback so
+  // deleteTarget.name is still in the closure (setDeleteTarget runs async).
   const confirmDelete = useCallback(() => {
     if (!deleteTarget) return
     if (deleteTarget.type === 'folder') deleteFolder(deleteTarget.id)

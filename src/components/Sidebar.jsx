@@ -5,6 +5,9 @@ import FolderItem from './FolderItem'
 export default function Sidebar() {
   const { folders, moveNote, moveFolder } = useNotes()
 
+  // Dispatches to moveFolder or moveNote based on the DnD type. The folder
+  // list Droppable uses type="FOLDER" to keep folder drags isolated from note
+  // drags — notes live in DEFAULT-type Droppables inside each folder.
   function handleDragEnd(result) {
     const { source, destination, draggableId, type } = result
     if (!destination) return
@@ -25,6 +28,8 @@ export default function Sidebar() {
     >
       <div className="flex-1 overflow-y-auto px-2 py-2">
         <DragDropContext onDragEnd={handleDragEnd}>
+          {/* type="FOLDER" isolates folder drags from note drags
+               (notes use the default type in per-folder Droppables). */}
           {folders.length === 0 ? (
             <p className="text-sm text-gray-500 px-2 py-4 text-center">
               No folders yet. Click "+ Folder" to begin.

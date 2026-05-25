@@ -65,6 +65,9 @@ export default function EditorArea() {
   return (
     <main className="flex-1 flex flex-col bg-editor-bg overflow-hidden">
       <NoteToolbar editor={editor} />
+      {/* Flex chain cascades height so .ProseMirror fills full editor area.
+           Without this the contenteditable div only matches content height,
+           making empty space below text unclickable. */}
       <div className="flex-1 overflow-y-auto flex flex-col">
         <EditorContent editor={editor} className="flex-1 flex flex-col" />
       </div>

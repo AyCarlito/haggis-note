@@ -18,6 +18,8 @@
   --color-overlay: rgba(0, 0, 0, 0.5);
 }
 
+/* Disables all CSS transitions and animations when the user prefers reduced
+   motion, including @hello-pangea/dnd drag animations. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     transition: none !important;
@@ -30,6 +32,8 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
+/* Tailwind's preflight removes list markers globally, so we restore them
+   inside the TipTap editor where bullet/ordered lists are semantically used. */
 .ProseMirror ul {
   list-style: disc;
   padding-left: 1.5em;

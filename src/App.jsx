@@ -9,6 +9,8 @@ import DeleteConfirmDialog from './components/DeleteConfirmDialog'
 
 import { useNotes } from './context/NotesContext'
 
+// Screen-reader live region that announces folder/note create, delete, and
+// move actions. Visually hidden — Tailwind sr-only keeps it accessible.
 function AriaLive() {
   const { announcement } = useNotes()
   return (

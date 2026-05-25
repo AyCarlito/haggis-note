@@ -6,6 +6,9 @@ export default function DeleteConfirmDialog() {
   const confirmRef = useRef(null)
   const prevFocusRef = useRef(null)
 
+  // Captures the previously focused element when the dialog opens and restores
+  // focus when it closes, so keyboard/screen-reader users don't lose their
+  // place in the sidebar.
   useEffect(() => {
     if (deleteTarget) {
       prevFocusRef.current = document.activeElement

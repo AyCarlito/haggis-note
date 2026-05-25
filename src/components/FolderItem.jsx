@@ -63,6 +63,9 @@ export default function FolderItem({ folder, index }) {
     selectFolder(folder.id)
   }
 
+  // Draggable wraps the entire folder so it moves as one unit during drag.
+  // dragHandleProps is on the header row only (not the notes list) so the
+  // user grabs the folder by its name area, not by individual notes.
   return (
     <Draggable draggableId={folder.id} index={index}>
       {(provided, snapshot) => (
@@ -110,33 +113,37 @@ export default function FolderItem({ folder, index }) {
                 {folder.name}
               </span>
             )}
-            {!editing && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  addNoteToFolder(folder.id)
-                }}
-                className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-accent transition-opacity"
-                aria-label={`Add note to ${folder.name}`}
-                tabIndex={-1}
-              >
-                +
-              </button>
-            )}
-            <span className="text-xs text-gray-500">{folder.notes.length}</span>
-            {!editing && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  requestDelete({ type: 'folder', id: folder.id, name: folder.name })
-                }}
-                className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-danger transition-opacity"
-                aria-label={`Delete folder ${folder.name}`}
-                tabIndex={-1}
-              >
-                ✕
-              </button>
-            )}
+        {/*
+          Per-folder "+" button creates a note directly in this folder,
+          bypassing the global header button which targets the selected folder.
+        */}
+        {!editing && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              addNoteToFolder(folder.id)
+            }}
+            className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-accent transition-opacity"
+            aria-label={`Add note to ${folder.name}`}
+            tabIndex={-1}
+          >
+            +
+          </button>
+        )}
+        <span className="text-xs text-gray-500">{folder.notes.length}</span>
+        {!editing && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              requestDelete({ type: 'folder', id: folder.id, name: folder.name })
+            }}
+            className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-danger transition-opacity"
+            aria-label={`Delete folder ${folder.name}`}
+            tabIndex={-1}
+          >
+            ✕
+          </button>
+        )}
           </div>
           {isExpanded && (
             <Droppable droppableId={folder.id} direction="vertical">
