@@ -18,6 +18,7 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
     multiSelectedIds,
     toggleMultiSelect,
     setSingleMultiSelection,
+    selectRange,
   } = useNotes()
 
   const isExpanded = forceExpanded || !folder.collapsed
@@ -53,6 +54,11 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
   }
 
   function handleHeaderClick(e) {
+    if (e.shiftKey) {
+      e.preventDefault()
+      selectRange({ type: 'folder', id: folder.id, name: folder.name })
+      return
+    }
     if (e.ctrlKey || e.metaKey) {
       toggleMultiSelect({ type: 'folder', id: folder.id, name: folder.name })
       return

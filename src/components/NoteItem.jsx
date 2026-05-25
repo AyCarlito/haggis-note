@@ -3,7 +3,7 @@ import { Draggable } from '@hello-pangea/dnd'
 import { useNotes } from '../context/NotesContext'
 
 export default function NoteItem({ note, folderId, index, disableDnd = false }) {
-  const { selectedNoteId, selectNote, requestDelete, requestRename, renameTarget, finishRename, cancelRename, openContextMenu, multiSelectedIds, toggleMultiSelect, setSingleMultiSelection } = useNotes()
+  const { selectedNoteId, selectNote, requestDelete, requestRename, renameTarget, finishRename, cancelRename, openContextMenu, multiSelectedIds, toggleMultiSelect, setSingleMultiSelection, selectRange } = useNotes()
   const isSelected = selectedNoteId === note.id
   const isMultiSelected = multiSelectedIds.includes(note.id)
   const editing = renameTarget?.type === 'note' && renameTarget?.id === note.id
@@ -18,6 +18,11 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
   }, [editing])
 
   function handleClick(e) {
+    if (e.shiftKey) {
+      e.preventDefault()
+      selectRange({ type: 'note', id: note.id, name: note.name, folderId })
+      return
+    }
     if (e.ctrlKey || e.metaKey) {
       toggleMultiSelect({ type: 'note', id: note.id, name: note.name, folderId })
     } else {

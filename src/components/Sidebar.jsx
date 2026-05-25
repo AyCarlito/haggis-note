@@ -86,7 +86,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="w-72 shrink-0 h-full bg-gradient-to-b from-[#232544] to-[#2a2b4e] text-sidebar-fg border-r border-sidebar-border flex flex-col overflow-hidden"
+      className="w-72 shrink-0 h-full bg-gradient-to-b from-[#232544] to-[#2a2b4e] text-sidebar-fg border-r border-sidebar-border flex flex-col overflow-hidden select-none"
       role="tree"
       aria-label="Folders and notes"
     >

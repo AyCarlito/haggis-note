@@ -17,6 +17,7 @@ export function NotesProvider({ children, data, updateData }) {
   const [renameTarget, setRenameTarget] = useState(null)
   const [contextMenu, setContextMenu] = useState(null)
   const [multiSelectedIds, setMultiSelectedIds] = useState([])
+  const lastClickedIdRef = useRef(null)
 
   // Holds the current screen-reader announcement string. Cleared after 3s so
   // repeated identical announcements re-trigger the aria-live region in App.jsx.
@@ -79,6 +80,7 @@ export function NotesProvider({ children, data, updateData }) {
   }, [folders, rootNotes, selectNote])
 
   const toggleMultiSelect = useCallback((target) => {
+    lastClickedIdRef.current = target.id
     const isRemoving = multiSelectedIds.includes(target.id)
     const nextMulti = isRemoving
       ? multiSelectedIds.filter((id) => id !== target.id)
@@ -105,6 +107,7 @@ export function NotesProvider({ children, data, updateData }) {
   }, [multiSelectedIds, selectedNoteId, selectedFolderId])
 
   const setSingleMultiSelection = useCallback((target) => {
+    lastClickedIdRef.current = target.id
     setMultiSelectedIds([target.id])
     if (target.type === 'note') {
       setSelectedNoteId(target.id)
@@ -118,6 +121,44 @@ export function NotesProvider({ children, data, updateData }) {
   const clearMultiSelection = useCallback(() => {
     setMultiSelectedIds([])
   }, [])
+
+  const selectRange = useCallback((target) => {
+    const anchorId = lastClickedIdRef.current
+    if (!anchorId) return
+
+    let items
+    if (target.type === 'note') {
+      const folderId = target.folderId
+      if (folderId) {
+        const folder = folders.find((f) => f.id === folderId)
+        if (!folder) return
+        items = folder.notes
+      } else {
+        items = rootNotes
+      }
+    } else if (target.type === 'folder') {
+      items = folders
+    } else {
+      return
+    }
+
+    const targetIdx = items.findIndex((item) => item.id === target.id)
+    const anchorIdx = items.findIndex((item) => item.id === anchorId)
+    if (targetIdx === -1 || anchorIdx === -1) return
+
+    const [start, end] = targetIdx < anchorIdx ? [targetIdx, anchorIdx] : [anchorIdx, targetIdx]
+    const ids = items.slice(start, end + 1).map((item) => item.id)
+
+    setMultiSelectedIds(ids)
+
+    if (target.type === 'note') {
+      setSelectedNoteId(target.id)
+      setSelectedFolderId(target.folderId ?? null)
+    } else if (target.type === 'folder') {
+      setSelectedFolderId(target.id)
+      setSelectedNoteId(null)
+    }
+  }, [folders, rootNotes])
 
   const requestBulkDelete = useCallback(() => {
     if (multiSelectedIds.length === 0) return
@@ -439,6 +480,7 @@ export function NotesProvider({ children, data, updateData }) {
       toggleMultiSelect,
       setSingleMultiSelection,
       clearMultiSelection,
+      selectRange,
       requestBulkDelete,
     }),
     [
