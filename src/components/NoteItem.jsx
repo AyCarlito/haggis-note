@@ -3,7 +3,7 @@ import { Draggable } from '@hello-pangea/dnd'
 import { useNotes } from '../context/NotesContext'
 
 export default function NoteItem({ note, folderId, index, disableDnd = false }) {
-  const { selectedNoteId, selectNote, requestDelete, requestRename, renameTarget, finishRename, cancelRename } = useNotes()
+  const { selectedNoteId, selectNote, requestDelete, requestRename, renameTarget, finishRename, cancelRename, openContextMenu } = useNotes()
   const isSelected = selectedNoteId === note.id
   const editing = renameTarget?.type === 'note' && renameTarget?.id === note.id
   const [editValue, setEditValue] = useState(note.name)
@@ -82,6 +82,7 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
         aria-selected={isSelected}
         tabIndex={0}
         onClick={() => selectNote(folderId, note.id)}
+        onContextMenu={(e) => openContextMenu(e, { type: 'note', id: note.id, name: note.name, folderId })}
         onKeyDown={(e) => {
           if (e.key === 'Enter') selectNote(folderId, note.id)
         }}
@@ -110,6 +111,7 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
           aria-selected={isSelected}
           tabIndex={0}
           onClick={() => selectNote(folderId, note.id)}
+          onContextMenu={(e) => openContextMenu(e, { type: 'note', id: note.id, name: note.name, folderId })}
           onKeyDown={(e) => {
             if (e.key === 'Enter') selectNote(folderId, note.id)
           }}

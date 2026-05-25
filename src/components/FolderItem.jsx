@@ -14,6 +14,7 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
     finishRename,
     cancelRename,
     addNoteToFolder,
+    openContextMenu,
   } = useNotes()
 
   const isExpanded = forceExpanded || !folder.collapsed
@@ -127,7 +128,11 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
 
   if (disableDnd) {
     return (
-      <div role="treeitem" aria-expanded={isExpanded}>
+      <div
+        role="treeitem"
+        aria-expanded={isExpanded}
+        onContextMenu={(e) => openContextMenu(e, { type: 'folder', id: folder.id, name: folder.name })}
+      >
         {headerContent}
         {isExpanded && (
           <div
@@ -154,6 +159,7 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
           className={snapshot.isDragging ? 'opacity-50' : ''}
           role="treeitem"
           aria-expanded={isExpanded}
+          onContextMenu={(e) => openContextMenu(e, { type: 'folder', id: folder.id, name: folder.name })}
         >
           <div {...provided.dragHandleProps}>
             {headerContent}

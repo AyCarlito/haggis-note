@@ -14,6 +14,7 @@ export function NotesProvider({ children, data, updateData }) {
   const [selectedNoteId, setSelectedNoteId] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [renameTarget, setRenameTarget] = useState(null)
+  const [contextMenu, setContextMenu] = useState(null)
 
   // Holds the current screen-reader announcement string. Cleared after 3s so
   // repeated identical announcements re-trigger the aria-live region in App.jsx.
@@ -213,6 +214,16 @@ export function NotesProvider({ children, data, updateData }) {
     setRenameTarget(null)
   }, [])
 
+  const openContextMenu = useCallback((e, target) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setContextMenu({ x: e.clientX, y: e.clientY, target })
+  }, [])
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu(null)
+  }, [])
+
   const firstFolderId = folders[0]?.id ?? null
 
   // Callbacks intentionally omitted from deps per React convention (stable via useCallback)
@@ -246,6 +257,9 @@ export function NotesProvider({ children, data, updateData }) {
       requestRename,
       finishRename,
       cancelRename,
+      contextMenu,
+      openContextMenu,
+      closeContextMenu,
     }),
     [
       folders,
@@ -256,6 +270,7 @@ export function NotesProvider({ children, data, updateData }) {
       deleteTarget,
       renameTarget,
       firstFolderId,
+      contextMenu,
     ],
   )
   /* eslint-enable react-hooks/exhaustive-deps */

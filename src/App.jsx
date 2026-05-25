@@ -6,6 +6,7 @@ import EditorArea from './components/EditorArea'
 import StatusBar from './components/StatusBar'
 import StorageWarning from './components/StorageWarning'
 import DeleteConfirmDialog from './components/DeleteConfirmDialog'
+import ContextMenu from './components/ContextMenu'
 
 import { useNotes } from './context/NotesContext'
 
@@ -51,6 +52,7 @@ export default function App() {
         <StatusBar />
       </div>
       <DeleteConfirmDialog />
+      <ContextMenu />
       <AriaLive />
     </NotesProvider>
   )
