@@ -3,7 +3,7 @@ import { useNotes } from '../context/NotesContext'
 export default function SearchNoteItem({ note, folderId, onClick }) {
   const { selectedNoteId, folders } = useNotes()
   const isSelected = selectedNoteId === note.id
-  const parentFolder = folders.find((f) => f.id === folderId)
+  const parentFolder = folderId ? folders.find((f) => f.id === folderId) : null
 
   return (
     <div
@@ -25,7 +25,7 @@ export default function SearchNoteItem({ note, folderId, onClick }) {
       </span>
       <span className="flex-1 truncate">{note.name}</span>
       <span className="text-xs text-gray-500 truncate max-w-[100px] text-right">
-        {parentFolder?.name}
+        {parentFolder ? parentFolder.name : 'Unparented'}
       </span>
     </div>
   )

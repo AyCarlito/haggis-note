@@ -2,11 +2,12 @@ import { useState, useMemo, useEffect } from 'react'
 import { DragDropContext, Droppable } from '@hello-pangea/dnd'
 import { useNotes } from '../context/NotesContext'
 import FolderItem from './FolderItem'
+import NoteItem from './NoteItem'
 import SearchBar from './SearchBar'
 import SearchNoteItem from './SearchNoteItem'
 
 export default function Sidebar() {
-  const { folders, moveNote, moveFolder, selectNote, selectedNoteId, openContextMenu } = useNotes()
+  const { folders, rootNotes, moveNote, moveFolder, selectNote, selectFolder, selectedNoteId, openContextMenu } = useNotes()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [searchNoteFolderId, setSearchNoteFolderId] = useState(null)
@@ -19,6 +20,12 @@ export default function Sidebar() {
     const q = searchQuery.toLowerCase().trim()
     const fFolders = []
     const fNotes = []
+
+    for (const note of rootNotes) {
+      if (note.name.toLowerCase().includes(q)) {
+        fNotes.push({ note, parentFolderId: null })
+      }
+    }
 
     for (const folder of folders) {
       const folderNameMatch = folder.name.toLowerCase().includes(q)
@@ -38,7 +45,7 @@ export default function Sidebar() {
     }
 
     return { filteredFolders: fFolders, filteredNotes: fNotes }
-  }, [folders, searchQuery, searchNoteFolderId, isSearchActive])
+  }, [folders, rootNotes, searchQuery, searchNoteFolderId, isSearchActive])
 
   function handleClearSearch() {
     setSearchQuery('')
@@ -86,6 +93,7 @@ export default function Sidebar() {
 
       <div
         className="flex-1 overflow-y-auto px-2 pb-2 sidebar-scroll"
+        onClick={(e) => { if (e.target === e.currentTarget) selectFolder(null) }}
         onContextMenu={(e) => openContextMenu(e, { type: 'area' })}
       >
         {isSearchActive ? (
@@ -115,28 +123,55 @@ export default function Sidebar() {
             </>
           )
         ) : (
-          <DragDropContext onDragEnd={handleDragEnd}>
-            {folders.length === 0 ? (
+          <>
+            {folders.length === 0 && rootNotes.length === 0 ? (
               <p className="text-sm text-gray-500 px-2 py-4 text-center">
                 No folders yet. Click &quot;+ Folder&quot; to begin.
               </p>
             ) : (
-              <Droppable droppableId="folders" type="FOLDER">
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`space-y-1 ${snapshot.isDraggingOver ? 'bg-gray-800 rounded' : ''}`}
-                  >
-                    {folders.map((folder, i) => (
-                      <FolderItem key={folder.id} folder={folder} index={i} />
-                    ))}
-                    {provided.placeholder}
+              <DragDropContext onDragEnd={handleDragEnd}>
+                {rootNotes.length > 0 && (
+                  <div className="mb-3">
+                    <div className="px-3 py-1.5 text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                      Unparented
+                    </div>
+                    <Droppable droppableId="__root__">
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`min-h-[4px] transition-colors ${
+                            snapshot.isDraggingOver ? 'bg-white/[0.04] rounded' : ''
+                          }`}
+                        >
+                          {rootNotes.map((note, i) => (
+                            <NoteItem key={note.id} note={note} folderId={null} index={i} />
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
                   </div>
                 )}
-              </Droppable>
+                {folders.length > 0 && (
+                  <Droppable droppableId="folders" type="FOLDER">
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={`space-y-1 ${snapshot.isDraggingOver ? 'bg-gray-800 rounded' : ''}`}
+                      >
+                        {folders.map((folder, i) => (
+                          <FolderItem key={folder.id} folder={folder} index={i} />
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                )}
+              </DragDropContext>
             )}
-          </DragDropContext>
+          </>
         )}
       </div>
     </aside>
