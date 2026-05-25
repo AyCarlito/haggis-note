@@ -89,7 +89,19 @@ Filtering via `useMemo` partitions folders into three groups:
 
 When search is active, `DragDropContext` is not rendered (DnD disabled). `FolderItem` receives `forceExpanded` + `disableDnd` props to render without DnD wrappers; `NoteItem` receives `disableDnd` to render without `Draggable`.
 
-Keyboard: Ctrl+F / Cmd+F focuses the search bar; Escape clears search.
+Keyboard: Ctrl+F / Cmd+F focuses the search bar (skipped when a note is selected — browser find-in-page takes over); Escape clears search.
+
+## Context Menu
+
+`ContextMenu.jsx` rendered in `App.jsx` (overlay, not inside the sidebar to avoid `overflow-hidden` clipping). State managed in `NotesContext` (`contextMenu`, `openContextMenu`, `closeContextMenu`).
+
+Right-click targets:
+- **Folder**: Add Note, Rename, Delete
+- **Note**: Rename, Delete
+
+Positioning: initial `left`/`top` set to cursor coords, then adjusted in a `useEffect` via `measureElement` + direct DOM mutation (no cascading re-render) to keep within viewport.
+
+Keyboard: Arrow Up/Down to navigate, Enter to activate, Escape to dismiss. Focus is saved on open and restored on close. No right-click menu in search results.
 
 ## ESLint notes
 
