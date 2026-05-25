@@ -57,6 +57,8 @@ export default function EditorArea() {
     },
   })
 
+  // Sync editor content when switching notes. Use emitUpdate: false to
+  // prevent onUpdate from re-saving the content we just loaded.
   useEffect(() => {
     if (editor && selectedNote) {
       if (prevNoteIdRef.current !== selectedNote.id) {

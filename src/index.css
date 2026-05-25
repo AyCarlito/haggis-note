@@ -50,6 +50,19 @@ body {
   cursor: pointer;
 }
 
+.ProseMirror p:first-child:last-child:has(> br.ProseMirror-trailingBreak)::before {
+  color: #9ca3af;
+  content: 'Start typing…';
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror p:has(> br.ProseMirror-trailingBreak)::selection,
+.ProseMirror p:has(> br.ProseMirror-trailingBreak) *::selection {
+  background: transparent;
+}
+
 /* Thin custom scrollbar for the sidebar */
 .sidebar-scroll::-webkit-scrollbar {
   width: 6px;
