@@ -1,13 +1,69 @@
+import { useState, useMemo, useEffect } from 'react'
 import { DragDropContext, Droppable } from '@hello-pangea/dnd'
 import { useNotes } from '../context/NotesContext'
 import FolderItem from './FolderItem'
+import SearchBar from './SearchBar'
+import SearchNoteItem from './SearchNoteItem'
 
 export default function Sidebar() {
-  const { folders, moveNote, moveFolder } = useNotes()
+  const { folders, moveNote, moveFolder, selectNote } = useNotes()
 
-  // Dispatches to moveFolder or moveNote based on the DnD type. The folder
-  // list Droppable uses type="FOLDER" to keep folder drags isolated from note
-  // drags — notes live in DEFAULT-type Droppables inside each folder.
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchNoteFolderId, setSearchNoteFolderId] = useState(null)
+
+  const isSearchActive = searchQuery.trim().length > 0
+
+  const { filteredFolders, filteredNotes } = useMemo(() => {
+    if (!isSearchActive) return { filteredFolders: folders, filteredNotes: [] }
+
+    const q = searchQuery.toLowerCase().trim()
+    const fFolders = []
+    const fNotes = []
+
+    for (const folder of folders) {
+      const folderNameMatch = folder.name.toLowerCase().includes(q)
+
+      if (folderNameMatch) {
+        fFolders.push({ ...folder, collapsed: false })
+      } else if (searchNoteFolderId === folder.id) {
+        fFolders.push({ ...folder, collapsed: false })
+      } else {
+        const matchedNotes = folder.notes.filter((n) =>
+          n.name.toLowerCase().includes(q),
+        )
+        for (const note of matchedNotes) {
+          fNotes.push({ note, parentFolderId: folder.id })
+        }
+      }
+    }
+
+    return { filteredFolders: fFolders, filteredNotes: fNotes }
+  }, [folders, searchQuery, searchNoteFolderId, isSearchActive])
+
+  function handleClearSearch() {
+    setSearchQuery('')
+    setSearchNoteFolderId(null)
+  }
+
+  function handleSelectSearchNote(folderId, noteId) {
+    selectNote(folderId, noteId)
+    setSearchNoteFolderId(folderId)
+  }
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault()
+        document.querySelector('[data-search-input]')?.focus()
+      }
+      if (e.key === 'Escape' && isSearchActive) {
+        handleClearSearch()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isSearchActive])
+
   function handleDragEnd(result) {
     const { source, destination, draggableId, type } = result
     if (!destination) return
@@ -26,31 +82,59 @@ export default function Sidebar() {
       role="tree"
       aria-label="Folders and notes"
     >
-      <div className="flex-1 overflow-y-auto px-2 py-2 sidebar-scroll">
-        <DragDropContext onDragEnd={handleDragEnd}>
-          {/* type="FOLDER" isolates folder drags from note drags
-               (notes use the default type in per-folder Droppables). */}
-          {folders.length === 0 ? (
+      <SearchBar query={searchQuery} onChange={setSearchQuery} onClear={handleClearSearch} />
+
+      <div className="flex-1 overflow-y-auto px-2 pb-2 sidebar-scroll">
+        {isSearchActive ? (
+          filteredFolders.length === 0 && filteredNotes.length === 0 ? (
             <p className="text-sm text-gray-500 px-2 py-4 text-center">
-              No folders yet. Click "+ Folder" to begin.
+              No results found.
             </p>
           ) : (
-            <Droppable droppableId="folders" type="FOLDER">
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={`space-y-1 ${snapshot.isDraggingOver ? 'bg-gray-800 rounded' : ''}`}
-                >
-                  {folders.map((folder, i) => (
-                    <FolderItem key={folder.id} folder={folder} index={i} />
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          )}
-        </DragDropContext>
+            <>
+              {filteredFolders.map((folder) => (
+                <FolderItem
+                  key={folder.id}
+                  folder={folder}
+                  index={0}
+                  forceExpanded
+                  disableDnd
+                />
+              ))}
+              {filteredNotes.map(({ note, parentFolderId }) => (
+                <SearchNoteItem
+                  key={note.id}
+                  note={note}
+                  folderId={parentFolderId}
+                  onClick={() => handleSelectSearchNote(parentFolderId, note.id)}
+                />
+              ))}
+            </>
+          )
+        ) : (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            {folders.length === 0 ? (
+              <p className="text-sm text-gray-500 px-2 py-4 text-center">
+                No folders yet. Click &quot;+ Folder&quot; to begin.
+              </p>
+            ) : (
+              <Droppable droppableId="folders" type="FOLDER">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`space-y-1 ${snapshot.isDraggingOver ? 'bg-gray-800 rounded' : ''}`}
+                  >
+                    {folders.map((folder, i) => (
+                      <FolderItem key={folder.id} folder={folder} index={i} />
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            )}
+          </DragDropContext>
+        )}
       </div>
     </aside>
   )

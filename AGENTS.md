@@ -78,6 +78,19 @@ Custom `FontSize` extension in `src/extensions/FontSize.js` (extends TextStyle).
 
 Folders are also Draggable for reordering. The folder list has a `Droppable` with `type="FOLDER"` (isolated from note drags which use the default type). `dragHandleProps` is on the folder header only, not the notes area.
 
+## Search
+
+Search state is **local to `Sidebar.jsx`** (`searchQuery`, `searchNoteFolderId` — not in `NotesContext`).
+
+Filtering via `useMemo` partitions folders into three groups:
+- **Folder matches**: folder name matches query → shown expanded with all notes
+- **Revealed folder**: when a note-match is clicked, its folder is revealed with all sibling notes
+- **Note matches**: notes whose name matches but parent folder doesn't → shown as flat `SearchNoteItem` items with parent folder name as secondary label
+
+When search is active, `DragDropContext` is not rendered (DnD disabled). `FolderItem` receives `forceExpanded` + `disableDnd` props to render without DnD wrappers; `NoteItem` receives `disableDnd` to render without `Draggable`.
+
+Keyboard: Ctrl+F / Cmd+F focuses the search bar; Escape clears search.
+
 ## ESLint notes
 
 Flat config. Strict `react-hooks/set-state-in-effect` rule — writing state inside `useEffect` body will fail lint. Missing dependency warnings in `useMemo`/`useCallback` are common; the context value object intentionally omits stable callback refs from its dependency array per React convention.

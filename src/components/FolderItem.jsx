@@ -3,7 +3,7 @@ import { Draggable, Droppable } from '@hello-pangea/dnd'
 import { useNotes } from '../context/NotesContext'
 import NoteItem from './NoteItem'
 
-export default function FolderItem({ folder, index }) {
+export default function FolderItem({ folder, index, forceExpanded = false, disableDnd = false }) {
   const {
     toggleExpanded,
     selectedFolderId,
@@ -16,7 +16,7 @@ export default function FolderItem({ folder, index }) {
     addNoteToFolder,
   } = useNotes()
 
-  const isExpanded = !folder.collapsed
+  const isExpanded = forceExpanded || !folder.collapsed
   const isSelected = selectedFolderId === folder.id
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(folder.name)
@@ -59,13 +59,102 @@ export default function FolderItem({ folder, index }) {
   }
 
   function handleToggle() {
-    toggleExpanded(folder.id)
+    if (!forceExpanded) toggleExpanded(folder.id)
     selectFolder(folder.id)
   }
 
-  // Draggable wraps the entire folder so it moves as one unit during drag.
-  // dragHandleProps is on the header row only (not the notes list) so the
-  // user grabs the folder by its name area, not by individual notes.
+  const headerContent = (
+    <div
+      className={`group flex items-center gap-1.5 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
+        isSelected
+          ? 'text-sidebar-fg bg-white/[0.06] border-l-2 border-accent pl-[10px]'
+          : 'text-gray-300 hover:bg-white/[0.04]'
+      }`}
+      tabIndex={0}
+      onClick={handleToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleToggle()
+        }
+        if (!forceExpanded) {
+          if (e.key === 'ArrowRight' && !isExpanded) toggleExpanded(folder.id)
+          if (e.key === 'ArrowLeft' && isExpanded) toggleExpanded(folder.id)
+        }
+      }}
+    >
+      {!forceExpanded && (
+        <span
+          className={`shrink-0 text-xs transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+          aria-hidden="true"
+        >
+          &#x25B6;
+        </span>
+      )}
+      {editing ? (
+        <input
+          ref={inputRef}
+          className="flex-1 bg-transparent border-b border-current outline-none text-sm min-w-0"
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          onClick={(e) => e.stopPropagation()}
+        />
+      ) : (
+        <span className="flex-1 truncate font-medium" onDoubleClick={handleDoubleClick}>
+          {folder.name}
+        </span>
+      )}
+      {!editing && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            addNoteToFolder(folder.id)
+          }}
+          className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-accent transition-opacity"
+          aria-label={`Add note to ${folder.name}`}
+          tabIndex={-1}
+        >
+          +
+        </button>
+      )}
+      <span className="text-xs text-gray-500">{folder.notes.length}</span>
+      {!editing && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            requestDelete({ type: 'folder', id: folder.id, name: folder.name })
+          }}
+          className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-danger transition-opacity"
+          aria-label={`Delete folder ${folder.name}`}
+          tabIndex={-1}
+        >
+          &#x2715;
+        </button>
+      )}
+    </div>
+  )
+
+  if (disableDnd) {
+    return (
+      <div role="treeitem" aria-expanded={isExpanded}>
+        {headerContent}
+        {isExpanded && (
+          <div
+            className="ml-3 pl-2 border-l border-white/10 min-h-[4px]"
+            role="group"
+            aria-label={`Notes in ${folder.name}`}
+          >
+            {folder.notes.map((note, i) => (
+              <NoteItem key={note.id} note={note} folderId={folder.id} index={i} disableDnd />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <Draggable draggableId={folder.id} index={index}>
       {(provided, snapshot) => (
@@ -73,79 +162,12 @@ export default function FolderItem({ folder, index }) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           style={provided.draggableProps.style}
+          className={snapshot.isDragging ? 'opacity-50' : ''}
           role="treeitem"
           aria-expanded={isExpanded}
         >
-          <div
-            {...provided.dragHandleProps}
-            className={`group flex items-center gap-1.5 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
-              isSelected
-                ? 'text-sidebar-fg bg-white/[0.06] border-l-2 border-accent pl-[10px]'
-                : 'text-gray-300 hover:bg-white/[0.04]'
-            } ${snapshot.isDragging ? 'opacity-50' : ''}`}
-            tabIndex={0}
-            onClick={handleToggle}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                handleToggle()
-              }
-              if (e.key === 'ArrowRight' && !isExpanded) toggleExpanded(folder.id)
-              if (e.key === 'ArrowLeft' && isExpanded) toggleExpanded(folder.id)
-            }}
-          >
-            <span
-              className={`shrink-0 text-xs transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-              aria-hidden="true"
-            >
-              ▶
-            </span>
-            {editing ? (
-              <input
-                ref={inputRef}
-                className="flex-1 bg-transparent border-b border-current outline-none text-sm min-w-0"
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onBlur={handleBlur}
-                onKeyDown={handleKeyDown}
-                onClick={(e) => e.stopPropagation()}
-              />
-            ) : (
-              <span className="flex-1 truncate font-medium" onDoubleClick={handleDoubleClick}>
-                {folder.name}
-              </span>
-            )}
-        {/*
-          Per-folder "+" button creates a note directly in this folder,
-          bypassing the global header button which targets the selected folder.
-        */}
-        {!editing && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              addNoteToFolder(folder.id)
-            }}
-            className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-accent transition-opacity"
-            aria-label={`Add note to ${folder.name}`}
-            tabIndex={-1}
-          >
-            +
-          </button>
-        )}
-        <span className="text-xs text-gray-500">{folder.notes.length}</span>
-        {!editing && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              requestDelete({ type: 'folder', id: folder.id, name: folder.name })
-            }}
-            className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-danger transition-opacity"
-            aria-label={`Delete folder ${folder.name}`}
-            tabIndex={-1}
-          >
-            ✕
-          </button>
-        )}
+          <div {...provided.dragHandleProps}>
+            {headerContent}
           </div>
           {isExpanded && (
             <Droppable droppableId={folder.id} direction="vertical">
