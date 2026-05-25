@@ -42,8 +42,12 @@ function LinkIcon() {
 export default function NoteToolbar({ editor }) {
   if (!editor) return null
 
-  function isMarkActive(name) {
+  function isActive(name) {
     return editor.isActive(name)
+  }
+
+  function attrs(name) {
+    return editor.getAttributes(name)
   }
 
   return (
@@ -54,24 +58,36 @@ export default function NoteToolbar({ editor }) {
     >
       <button
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={`w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:bg-white/40 transition-colors ${isMarkActive('bold') ? 'bg-white/60 text-accent' : ''}`}
+        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+          isActive('bold')
+            ? 'bg-accent/20 text-accent'
+            : 'text-gray-600 hover:bg-white/40'
+        }`}
         aria-label="Bold"
       ><BoldIcon /></button>
       <button
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={`w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:bg-white/40 transition-colors ${isMarkActive('italic') ? 'bg-white/60 text-accent' : ''}`}
+        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+          isActive('italic')
+            ? 'bg-accent/20 text-accent'
+            : 'text-gray-600 hover:bg-white/40'
+        }`}
         aria-label="Italic"
       ><ItalicIcon /></button>
       <button
         onClick={() => editor.chain().focus().toggleUnderline().run()}
-        className={`w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:bg-white/40 transition-colors ${isMarkActive('underline') ? 'bg-white/60 text-accent' : ''}`}
+        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+          isActive('underline')
+            ? 'bg-accent/20 text-accent'
+            : 'text-gray-600 hover:bg-white/40'
+        }`}
         aria-label="Underline"
       ><UnderlineIcon /></button>
 
       <span className="w-px h-5 bg-white/30 mx-1" aria-hidden="true" />
 
       <select
-        value={editor.getAttributes('textStyle').fontFamily || 'sans-serif'}
+        value={attrs('textStyle').fontFamily || 'sans-serif'}
         onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
         className="px-1.5 py-1 text-xs border border-white/30 rounded-lg bg-white/60 text-gray-700"
         aria-label="Font family"
@@ -82,7 +98,7 @@ export default function NoteToolbar({ editor }) {
       </select>
 
       <select
-        value={editor.getAttributes('textStyle').fontSize || '16px'}
+        value={attrs('textStyle').fontSize || '16px'}
         onChange={(e) => editor.chain().focus().setFontSize(e.target.value).run()}
         className="px-1.5 py-1 text-xs border border-white/30 rounded-lg bg-white/60 text-gray-700"
         aria-label="Font size"
@@ -95,7 +111,7 @@ export default function NoteToolbar({ editor }) {
       <span className="w-px h-5 bg-white/30 mx-1" aria-hidden="true" />
 
       <select
-        value={editor.getAttributes('heading')?.level || 0}
+        value={attrs('heading')?.level || 0}
         onChange={(e) => {
           const level = parseInt(e.target.value)
           if (level) editor.chain().focus().toggleHeading({ level }).run()
@@ -114,7 +130,7 @@ export default function NoteToolbar({ editor }) {
 
       <input
         type="color"
-        value={editor.getAttributes('textStyle').color || '#000000'}
+        value={attrs('textStyle').color || '#000000'}
         onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
         className="w-7 h-7 p-0.5 border border-white/30 rounded-lg cursor-pointer bg-white/60"
         aria-label="Text color"
@@ -125,7 +141,11 @@ export default function NoteToolbar({ editor }) {
           const url = window.prompt('URL:')
           if (url) editor.chain().focus().setLink({ href: url }).run()
         }}
-        className={`w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:bg-white/40 transition-colors ${isMarkActive('link') ? 'bg-white/60 text-accent' : ''}`}
+        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+          isActive('link')
+            ? 'bg-accent/20 text-accent'
+            : 'text-gray-600 hover:bg-white/40'
+        }`}
         aria-label="Insert link"
       ><LinkIcon /></button>
     </div>

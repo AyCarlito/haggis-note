@@ -31,6 +31,7 @@ export default function EditorArea() {
       }),
     ],
     content: selectedNote?.content || '',
+    shouldRerenderOnTransaction: true,
     editorProps: {
       attributes: {
         class: 'flex-1 p-4 w-full outline-none text-gray-900 bg-white',
