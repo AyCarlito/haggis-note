@@ -57,7 +57,7 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
     <div
       className={`group flex items-center gap-1.5 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
         isSelected
-          ? 'text-sidebar-fg bg-white/[0.06] border-l-2 border-accent pl-[10px]'
+          ? 'text-sidebar-fg bg-accent/[0.12] border-l-[3px] border-accent pl-[9px]'
           : 'text-gray-300 hover:bg-white/[0.04]'
       }`}
       tabIndex={0}

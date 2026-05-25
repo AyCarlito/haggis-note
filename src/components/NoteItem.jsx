@@ -75,7 +75,7 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
       <div
         className={`group flex items-center gap-1.5 px-3 py-1.5 rounded text-sm cursor-pointer transition-colors ${
           isSelected
-            ? 'text-accent bg-accent/10 border-l-2 border-accent pl-[10px]'
+            ? 'text-sidebar-fg bg-accent/[0.12] border-l-[3px] border-accent pl-[9px]'
             : 'text-gray-300 hover:bg-white/[0.04]'
         }`}
         role="treeitem"
@@ -101,7 +101,7 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
           {...provided.dragHandleProps}
           className={`group flex items-center gap-1.5 px-3 py-1.5 rounded text-sm cursor-pointer transition-colors ${
             isSelected
-              ? 'text-accent bg-accent/10 border-l-2 border-accent pl-[10px]'
+              ? 'text-sidebar-fg bg-accent/[0.12] border-l-[3px] border-accent pl-[9px]'
               : snapshot.isDragging
                 ? 'text-sidebar-fg bg-white/10 shadow-xl rotate-[0.5deg]'
                 : 'text-gray-300 hover:bg-white/[0.04]'

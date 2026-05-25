@@ -9,7 +9,7 @@ export default function SearchNoteItem({ note, folderId, onClick }) {
     <div
       className={`group flex items-center gap-1.5 px-3 py-1.5 rounded text-sm cursor-pointer transition-colors ${
         isSelected
-          ? 'text-accent bg-accent/10 border-l-2 border-accent pl-[10px]'
+          ? 'text-sidebar-fg bg-accent/[0.12] border-l-[3px] border-accent pl-[9px]'
           : 'text-gray-300 hover:bg-white/[0.04]'
       }`}
       role="treeitem"
