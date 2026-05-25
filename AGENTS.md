@@ -26,9 +26,11 @@ main.jsx → App.jsx
 ### Key patterns
 
 - **All state mutations** go through `updateData(updater)` from `useStorage`. This is a functional setter (like `setState(prev => next)`) that schedules a debounced localStorage save. Never write directly to localStorage.
-- **Components never call `updateData` directly** — they use the action functions exposed by `useNotes()` (`addFolder`, `addNote`, `moveNote`, `deleteNote`, `updateNoteContent`, etc.).
+- **Components never call `updateData` directly** — they use the action functions exposed by `useNotes()` (`addFolder`, `addNote`, `addNoteToFolder`, `moveNote`, `moveFolder`, `deleteNote`, `updateNoteContent`, etc.).
 - `updateNoteContent(noteId, html)` is the Tiptap editor's save path. Content is stored as HTML.
-- `moveNote(noteId, srcFolderId, dstFolderId, srcIdx, dstIdx)` handles drag-and-drop across folders or reordering within a folder.
+- `moveNote(noteId, srcFolderId, dstFolderId, srcIdx, dstIdx)` handles note drag-and-drop across folders or reordering within a folder.
+- `moveFolder(folderId, srcIdx, dstIdx)` handles folder drag-and-drop reordering in the sidebar (flat list, no cross-container transfers).
+- `addNoteToFolder(folderId)` creates a note in a specific folder (used by per-folder "+" buttons in the sidebar).
 
 ## Tailwind v4 specifics
 
@@ -61,6 +63,8 @@ Custom `FontSize` extension in `src/extensions/FontSize.js` (extends TextStyle).
 ## DnD
 
 `@hello-pangea/dnd`. DragDropContext in `Sidebar.jsx`, Droppable per folder in `FolderItem.jsx`, Draggable per note in `NoteItem.jsx`. Keyboard support built-in (Space to lift, Arrows to move, Space to drop).
+
+Folders are also Draggable for reordering. The folder list has a `Droppable` with `type="FOLDER"` (isolated from note drags which use the default type). `dragHandleProps` is on the folder header only, not the notes area.
 
 ## ESLint notes
 
