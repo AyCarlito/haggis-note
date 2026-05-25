@@ -148,6 +148,17 @@ export function NotesProvider({ children, data, updateData }) {
     [updateData, folders, announce],
   )
 
+  const moveFolder = useCallback((folderId, sourceIdx, destIdx) => {
+    const folder = folders.find((f) => f.id === folderId)
+    updateData((prev) => {
+      const folders = [...prev.folders]
+      const [f] = folders.splice(sourceIdx, 1)
+      folders.splice(destIdx, 0, f)
+      return { ...prev, folders }
+    })
+    if (folder) announce(`Moved folder "${folder.name}"`)
+  }, [updateData, folders, announce])
+
   const requestDelete = useCallback((target) => {
     setDeleteTarget(target)
   }, [])
@@ -205,6 +216,7 @@ export function NotesProvider({ children, data, updateData }) {
       deleteFolder,
       deleteNote,
       moveNote,
+      moveFolder,
       requestDelete,
       cancelDelete,
       confirmDelete,

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Droppable } from '@hello-pangea/dnd'
+import { Draggable, Droppable } from '@hello-pangea/dnd'
 import { useNotes } from '../context/NotesContext'
 import NoteItem from './NoteItem'
 
@@ -64,91 +64,103 @@ export default function FolderItem({ folder, index }) {
   }
 
   return (
-    <div role="treeitem" aria-expanded={isExpanded}>
-      <div
-        className={`group flex items-center gap-1 px-2 py-2 rounded text-sm cursor-pointer transition-colors ${
-          isSelected ? 'bg-gray-700 text-sidebar-fg' : 'text-gray-300 hover:bg-gray-700'
-        }`}
-        tabIndex={0}
-        onClick={handleToggle}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            handleToggle()
-          }
-          if (e.key === 'ArrowRight' && !isExpanded) toggleExpanded(folder.id)
-          if (e.key === 'ArrowLeft' && isExpanded) toggleExpanded(folder.id)
-        }}
-      >
-        <span
-          className={`shrink-0 text-xs transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-          aria-hidden="true"
+    <Draggable draggableId={folder.id} index={index}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          style={provided.draggableProps.style}
+          role="treeitem"
+          aria-expanded={isExpanded}
         >
-          ▶
-        </span>
-        {editing ? (
-          <input
-            ref={inputRef}
-            className="flex-1 bg-transparent border-b border-current outline-none text-sm min-w-0"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            onClick={(e) => e.stopPropagation()}
-          />
-        ) : (
-          <span className="flex-1 truncate font-medium" onDoubleClick={handleDoubleClick}>
-            {folder.name}
-          </span>
-        )}
-        {!editing && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              addNoteToFolder(folder.id)
+          <div
+            {...provided.dragHandleProps}
+            className={`group flex items-center gap-1 px-2 py-2 rounded text-sm cursor-pointer transition-colors ${
+              isSelected ? 'bg-gray-700 text-sidebar-fg' : 'text-gray-300 hover:bg-gray-700'
+            } ${snapshot.isDragging ? 'opacity-50' : ''}`}
+            tabIndex={0}
+            onClick={handleToggle}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleToggle()
+              }
+              if (e.key === 'ArrowRight' && !isExpanded) toggleExpanded(folder.id)
+              if (e.key === 'ArrowLeft' && isExpanded) toggleExpanded(folder.id)
             }}
-            className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-accent transition-opacity"
-            aria-label={`Add note to ${folder.name}`}
-            tabIndex={-1}
           >
-            +
-          </button>
-        )}
-        <span className="text-xs text-gray-500">{folder.notes.length}</span>
-        {!editing && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              requestDelete({ type: 'folder', id: folder.id, name: folder.name })
-            }}
-            className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-danger transition-opacity"
-            aria-label={`Delete folder ${folder.name}`}
-            tabIndex={-1}
-          >
-            ✕
-          </button>
-        )}
-      </div>
-      {isExpanded && (
-        <Droppable droppableId={folder.id} direction="vertical">
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className={`ml-3 pl-2 border-l border-gray-600 min-h-[4px] transition-colors ${
-                snapshot.isDraggingOver ? 'border-accent bg-gray-800 rounded' : ''
-              }`}
-              role="group"
-              aria-label={`Notes in ${folder.name}`}
+            <span
+              className={`shrink-0 text-xs transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+              aria-hidden="true"
             >
-              {folder.notes.map((note, i) => (
-                <NoteItem key={note.id} note={note} folderId={folder.id} index={i} />
-              ))}
-              {provided.placeholder}
-            </div>
+              ▶
+            </span>
+            {editing ? (
+              <input
+                ref={inputRef}
+                className="flex-1 bg-transparent border-b border-current outline-none text-sm min-w-0"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <span className="flex-1 truncate font-medium" onDoubleClick={handleDoubleClick}>
+                {folder.name}
+              </span>
+            )}
+            {!editing && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  addNoteToFolder(folder.id)
+                }}
+                className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-accent transition-opacity"
+                aria-label={`Add note to ${folder.name}`}
+                tabIndex={-1}
+              >
+                +
+              </button>
+            )}
+            <span className="text-xs text-gray-500">{folder.notes.length}</span>
+            {!editing && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  requestDelete({ type: 'folder', id: folder.id, name: folder.name })
+                }}
+                className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-danger transition-opacity"
+                aria-label={`Delete folder ${folder.name}`}
+                tabIndex={-1}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          {isExpanded && (
+            <Droppable droppableId={folder.id} direction="vertical">
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={`ml-3 pl-2 border-l border-gray-600 min-h-[4px] transition-colors ${
+                    snapshot.isDraggingOver ? 'border-accent bg-gray-800 rounded' : ''
+                  }`}
+                  role="group"
+                  aria-label={`Notes in ${folder.name}`}
+                >
+                  {folder.notes.map((note, i) => (
+                    <NoteItem key={note.id} note={note} folderId={folder.id} index={i} />
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
           )}
-        </Droppable>
+          {provided.placeholder}
+        </div>
       )}
-    </div>
+    </Draggable>
   )
 }
