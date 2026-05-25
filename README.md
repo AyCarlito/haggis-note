@@ -1,16 +1,35 @@
-# React + Vite
+# HaggisNote
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Note-taking app that runs entirely in your browser. No server, no accounts. Everything stays on your computer.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Rich text editor with bold, italic, headings, colors, fonts, font sizes
+- Internal note-to-note linking
+- Folders with drag-and-drop reordering
+- Search notes by name
+- Multi-select with Ctrl+Click and Shift+Click for bulk operations
+- Keyboard shortcuts
+- Glass & Gradient UI theme
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** + **Vite 8**
+- **Tailwind CSS v4** (CSS-based config via `@theme` in `index.css`)
+- **TipTap v3** (StarterKit, Underline, Link, TextStyle, Color, FontFamily, FontSize)
+- **@hello-pangea/dnd** for drag-and-drop
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+
+- Node.js 22 (see `mise.toml`)
+
+### Commands
+
+```sh
+npm install       # install dependencies
+npm run dev       # start dev server (usually http://localhost:5173)
+npm run build     # production build
+npm run preview   # preview production build
+npm run lint      # run ESLint
