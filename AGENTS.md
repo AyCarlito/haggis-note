@@ -80,6 +80,27 @@ Glass & Gradient with indigo-purple palette:
 
 Custom `FontSize` extension in `src/extensions/FontSize.js` (extends TextStyle). All other extensions: StarterKit, Underline, Link, TextStyle, Color, FontFamily — configured in `EditorArea.jsx`.
 
+## Internal note-to-note links (note:// scheme)
+
+Links between notes use the `note://<noteId>` URL scheme. The `note` protocol is registered with `@tiptap/extension-link` via the `protocols` option so its `isAllowedUri` validator accepts it.
+
+**Creating a link:**
+- Select text in the editor, click the link toolbar button → the link popup appears
+- The "Link to note" section provides a note search input that filters `allNotes` by name (case-insensitive, max 5 results)
+- Clicking a result (or pressing Enter on a focused result) calls `selectNoteLink(note)` — fills the URL input with `note://<noteId>` and re-focuses the search input
+- Click "Apply" → `applyLink()` calls `editor.chain().focus().setLink({ href: trimmed }).run()` — wraps the selected text in a link mark (does nothing if no text is selected)
+- The linked text renders as `<a href="note://<id>">` — styled with accent color + dashed underline (`.ProseMirror a[href^="note://"]` in `index.css`)
+- When editing an existing `note://` link, a friendly label shows the linked note name below the URL input
+
+**Clicking a link in the editor:**
+- `EditorArea.jsx` has a `handleClick` in `editorProps` that uses `event.target.nodeType` to handle text nodes, `closest('a')` to find the anchor, and checks `anchor.getAttribute('href')` for `note://` prefix
+- On match, calls `navigateToNote(noteId)` from `NotesContext` — searches all folders + root notes for the ID and calls `selectNote(folderId, noteId)`
+- Returns `true` to prevent ProseMirror's default click handling
+
+**Relevant functions in `NotesContext`:**
+- `allNotes` — memoized flat array `{ id, name, folderId, folderName }` for all notes across folders and root notes (used by toolbar search)
+- `navigateToNote(noteId)` — finds a note by ID and navigates to it via `selectNote`
+
 ## DnD
 
 `@hello-pangea/dnd`. DragDropContext in `Sidebar.jsx`, Droppable per folder in `FolderItem.jsx`, Droppable for unparented notes with id `__root__`. Draggable per note in `NoteItem.jsx`. Keyboard support built-in (Space to lift, Arrows to move, Space to drop).
