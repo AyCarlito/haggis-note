@@ -13,6 +13,7 @@ export default function FolderItem({ folder, index }) {
     renameTarget,
     finishRename,
     cancelRename,
+    addNoteToFolder,
   } = useNotes()
 
   const isExpanded = !folder.collapsed
@@ -99,6 +100,19 @@ export default function FolderItem({ folder, index }) {
           <span className="flex-1 truncate font-medium" onDoubleClick={handleDoubleClick}>
             {folder.name}
           </span>
+        )}
+        {!editing && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              addNoteToFolder(folder.id)
+            }}
+            className="opacity-0 group-hover:opacity-100 p-0.5 text-xs text-gray-400 hover:text-accent transition-opacity"
+            aria-label={`Add note to ${folder.name}`}
+            tabIndex={-1}
+          >
+            +
+          </button>
         )}
         <span className="text-xs text-gray-500">{folder.notes.length}</span>
         {!editing && (

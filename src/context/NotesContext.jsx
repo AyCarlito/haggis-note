@@ -64,21 +64,25 @@ export function NotesProvider({ children, data, updateData }) {
     }))
   }, [updateData])
 
-  const addNote = useCallback(() => {
-    const targetId = selectedFolderId || folders[0]?.id
-    if (!targetId) return
+  const addNoteToFolder = useCallback((folderId) => {
     updateData((prev) => {
       const now = new Date().toISOString()
       const note = { id: uid(), name: 'Untitled', content: '', updatedAt: now }
       return {
         ...prev,
         folders: prev.folders.map((f) =>
-          f.id === targetId ? { ...f, notes: [...f.notes, note] } : f,
+          f.id === folderId ? { ...f, notes: [...f.notes, note] } : f,
         ),
       }
     })
     announce('Created note "Untitled"')
-  }, [updateData, selectedFolderId, folders, announce])
+  }, [updateData, announce])
+
+  const addNote = useCallback(() => {
+    const targetId = selectedFolderId || folders[0]?.id
+    if (!targetId) return
+    addNoteToFolder(targetId)
+  }, [selectedFolderId, folders, addNoteToFolder])
 
   const renameNote = useCallback((noteId, name) => {
     updateData((prev) => ({
@@ -197,6 +201,7 @@ export function NotesProvider({ children, data, updateData }) {
       addFolder,
       renameFolder,
       addNote,
+      addNoteToFolder,
       renameNote,
       updateNoteContent,
       deleteFolder,
