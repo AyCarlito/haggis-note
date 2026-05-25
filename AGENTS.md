@@ -164,3 +164,7 @@ Flat config. Strict `react-hooks/set-state-in-effect` rule — writing state ins
 - `prefers-reduced-motion` media query in `index.css`.
 - Sidebar uses `role="tree"` / `role="treeitem"`, toolbar uses `role="toolbar"`.
 
+## Help dialog
+
+`HelpDialog.jsx` is a modal overlay triggered by the info (ⓘ) icon in the header. It outlines how the app works and lists keyboard shortcuts. Close via: clicking the X button, pressing Escape, or clicking outside the dialog. Focus is saved on open and restored on close.
+
