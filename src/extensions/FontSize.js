@@ -1,5 +1,8 @@
 import { Extension } from '@tiptap/core'
 
+export const FONT_SIZES = ['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '48px']
+const DEFAULT_SIZE = '16px'
+
 export const FontSize = Extension.create({
   name: 'fontSize',
 
@@ -40,6 +43,27 @@ export const FontSize = Extension.create({
             .setMark('textStyle', { fontSize: null })
             .removeEmptyTextStyle()
             .run(),
+      increaseFontSize:
+        () =>
+        ({ editor }) => {
+          const current = editor.getAttributes('textStyle').fontSize || DEFAULT_SIZE
+          const idx = FONT_SIZES.indexOf(current)
+          if (idx < FONT_SIZES.length - 1) {
+            return editor.chain().setFontSize(FONT_SIZES[idx + 1]).run()
+          }
+          return false
+        },
+      decreaseFontSize:
+        () =>
+        ({ editor }) => {
+          const current = editor.getAttributes('textStyle').fontSize || DEFAULT_SIZE
+          const idx = FONT_SIZES.indexOf(current)
+          if (idx > 0) {
+            return editor.chain().setFontSize(FONT_SIZES[idx - 1]).run()
+          }
+          return false
+        },
     }
   },
+
 })

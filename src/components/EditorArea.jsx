@@ -35,6 +35,19 @@ export default function EditorArea() {
       attributes: {
         class: 'flex-1 p-4 w-full outline-none text-gray-900 bg-white',
       },
+      handleKeyDown: (view, event) => {
+        const isMod = event.ctrlKey || event.metaKey
+        if (isMod && event.shiftKey && (event.key === '>' || event.key === '<')) {
+          event.preventDefault()
+          if (event.key === '>') {
+            editor.chain().increaseFontSize().focus().run()
+          } else {
+            editor.chain().decreaseFontSize().focus().run()
+          }
+          return true
+        }
+        return false
+      },
     },
     onUpdate: ({ editor }) => {
       if (selectedNoteId) {

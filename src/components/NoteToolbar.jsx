@@ -1,5 +1,6 @@
+import { FONT_SIZES } from '../extensions/FontSize'
+
 const FONT_FAMILIES = ['sans-serif', 'serif', 'monospace', 'Arial', 'Georgia', 'Courier New', 'Times New Roman']
-const FONT_SIZES = ['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '48px']
 
 function BoldIcon() {
   return (
