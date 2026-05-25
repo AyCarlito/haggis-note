@@ -38,6 +38,18 @@ No `tailwind.config.js`. Configuration is CSS-based via `@theme` in `src/index.c
 - Custom color tokens: `bg-sidebar-bg`, `text-status-fg`, `bg-accent`, `bg-danger`, etc.
 - Plugin loaded via `@tailwindcss/vite` in `vite.config.js`.
 
+## Design theme
+
+Glass & Gradient with indigo-purple palette:
+
+- **Glass elements**: `.glass` utility in `index.css` (`backdrop-filter: blur(16px)`, `rgba(255,255,255,0.75)`) used on toolbar, status bar, empty-state card.
+- **Frosted overlay**: `.overlay-blur` for the delete dialog backdrop.
+- **Gradients**: Header uses `from-[#232544] via-[#2a2b4e]`, sidebar uses a vertical gradient to match.
+- **Editor bg**: `.editor-grid` adds a subtle 24px dot pattern behind the white editing surface.
+- **Sidebar scrollbar**: `.sidebar-scroll` — thin 6px custom scrollbar matching the palette.
+- **Font**: Inter loaded from Google Fonts in `index.html` (preconnect + stylesheet).
+- **Toolbar icons**: Inline SVG icon components (`BoldIcon`, `ItalicIcon`, `UnderlineIcon`, `LinkIcon`) in `NoteToolbar.jsx` — no emoji or text labels.
+
 ## Data model (localStorage key: `haggisnote-data`)
 
 ```json
