@@ -6,7 +6,7 @@ import SearchBar from './SearchBar'
 import SearchNoteItem from './SearchNoteItem'
 
 export default function Sidebar() {
-  const { folders, moveNote, moveFolder, selectNote } = useNotes()
+  const { folders, moveNote, moveFolder, selectNote, selectedNoteId } = useNotes()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [searchNoteFolderId, setSearchNoteFolderId] = useState(null)
@@ -52,7 +52,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     function handleKeyDown(e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f' && !selectedNoteId) {
         e.preventDefault()
         document.querySelector('[data-search-input]')?.focus()
       }
@@ -62,7 +62,7 @@ export default function Sidebar() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isSearchActive])
+  }, [isSearchActive, selectedNoteId])
 
   function handleDragEnd(result) {
     const { source, destination, draggableId, type } = result
