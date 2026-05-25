@@ -250,7 +250,7 @@ export default function NoteToolbar({ editor }) {
       {showLinkInput && (
         <div
           ref={popupRef}
-          className="absolute top-full right-0 mt-1 z-20 glass p-3 rounded-xl border border-white/20 shadow-xl min-w-[280px]"
+          className="absolute top-full right-0 max-md:left-2 max-md:right-2 mt-1 z-20 glass p-3 rounded-xl border border-white/20 shadow-xl min-w-[280px] max-md:min-w-0"
           onClick={(e) => e.stopPropagation()}
         >
           <input
