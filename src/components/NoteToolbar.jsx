@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { FONT_SIZES } from '../extensions/FontSize'
 
 const FONT_FAMILIES = ['sans-serif', 'serif', 'monospace', 'Arial', 'Georgia', 'Courier New', 'Times New Roman']
@@ -40,6 +41,28 @@ function LinkIcon() {
 }
 
 export default function NoteToolbar({ editor }) {
+  const [showLinkInput, setShowLinkInput] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
+  const inputRef = useRef(null)
+  const popupRef = useRef(null)
+
+  const handleGlobalMouseDown = useCallback((e) => {
+    if (popupRef.current && !popupRef.current.contains(e.target)) {
+      setShowLinkInput(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (showLinkInput) {
+      document.addEventListener('mousedown', handleGlobalMouseDown)
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    } else {
+      document.removeEventListener('mousedown', handleGlobalMouseDown)
+    }
+    return () => document.removeEventListener('mousedown', handleGlobalMouseDown)
+  }, [showLinkInput, handleGlobalMouseDown])
+
   if (!editor) return null
 
   function isActive(name) {
@@ -50,9 +73,34 @@ export default function NoteToolbar({ editor }) {
     return editor.getAttributes(name)
   }
 
+  const hasLink = isActive('link')
+  const currentHref = hasLink ? attrs('link').href : ''
+
+  function openLinkInput() {
+    setLinkUrl(currentHref || '')
+    setShowLinkInput(true)
+  }
+
+  function applyLink() {
+    const trimmed = linkUrl.trim()
+    if (trimmed) {
+      editor.chain().focus().setLink({ href: trimmed }).run()
+    }
+    setShowLinkInput(false)
+  }
+
+  function removeLink() {
+    editor.chain().focus().unsetLink().run()
+    setShowLinkInput(false)
+  }
+
+  function cancelLink() {
+    setShowLinkInput(false)
+  }
+
   return (
     <div
-      className="sticky top-0 z-10 glass p-2 flex gap-1 flex-wrap items-center"
+      className="relative sticky top-0 z-10 glass p-2 flex gap-1 flex-wrap items-center"
       role="toolbar"
       aria-label="Formatting"
     >
@@ -137,17 +185,57 @@ export default function NoteToolbar({ editor }) {
       />
 
       <button
-        onClick={() => {
-          const url = window.prompt('URL:')
-          if (url) editor.chain().focus().setLink({ href: url }).run()
-        }}
+        onClick={openLinkInput}
         className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-          isActive('link')
+          hasLink || showLinkInput
             ? 'bg-accent/20 text-accent'
             : 'text-gray-600 hover:bg-white/40'
         }`}
         aria-label="Insert link"
       ><LinkIcon /></button>
+
+      {showLinkInput && (
+        <div
+          ref={popupRef}
+          className="absolute top-full right-0 mt-1 z-20 glass p-3 rounded-xl border border-white/20 shadow-xl min-w-[280px]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <input
+            ref={inputRef}
+            type="url"
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') applyLink()
+              if (e.key === 'Escape') cancelLink()
+            }}
+            placeholder="https://example.com"
+            className="w-full px-2.5 py-1.5 text-sm border border-white/30 rounded-lg bg-white text-gray-800 placeholder-gray-400 outline-none focus:border-accent transition-colors"
+          />
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={applyLink}
+              className="flex-1 px-3 py-1.5 text-sm rounded-lg bg-accent text-white hover:bg-accent-hover transition-colors"
+            >
+              Apply
+            </button>
+            {hasLink && (
+              <button
+                onClick={removeLink}
+                className="px-3 py-1.5 text-sm rounded-lg bg-danger text-white hover:bg-danger-hover transition-colors"
+              >
+                Remove
+              </button>
+            )}
+            <button
+              onClick={cancelLink}
+              className="px-3 py-1.5 text-sm rounded-lg border border-white/30 text-gray-600 hover:bg-white/40 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
