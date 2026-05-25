@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback } from 'react'
 import { useNotes } from '../context/NotesContext'
 
 export default function ContextMenu() {
-  const { contextMenu, closeContextMenu, addNoteToFolder, requestRename, requestDelete } = useNotes()
+  const { contextMenu, closeContextMenu, addNoteToFolder, addFolder, requestRename, requestDelete } = useNotes()
 
   const menuRef = useRef(null)
 
@@ -102,7 +102,16 @@ export default function ContextMenu() {
     },
   ]
 
-  const items = target.type === 'folder' ? folderItems : noteItems
+  const areaItems = [
+    {
+      label: 'New Folder',
+      onClick: () => { addFolder(); closeContextMenu() },
+    },
+  ]
+
+  const items = target.type === 'folder' ? folderItems
+    : target.type === 'note' ? noteItems
+    : areaItems
 
   return (
     <div

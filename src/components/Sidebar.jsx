@@ -6,7 +6,7 @@ import SearchBar from './SearchBar'
 import SearchNoteItem from './SearchNoteItem'
 
 export default function Sidebar() {
-  const { folders, moveNote, moveFolder, selectNote, selectedNoteId } = useNotes()
+  const { folders, moveNote, moveFolder, selectNote, selectedNoteId, openContextMenu } = useNotes()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [searchNoteFolderId, setSearchNoteFolderId] = useState(null)
@@ -84,7 +84,10 @@ export default function Sidebar() {
     >
       <SearchBar query={searchQuery} onChange={setSearchQuery} onClear={handleClearSearch} />
 
-      <div className="flex-1 overflow-y-auto px-2 pb-2 sidebar-scroll">
+      <div
+        className="flex-1 overflow-y-auto px-2 pb-2 sidebar-scroll"
+        onContextMenu={(e) => openContextMenu(e, { type: 'area' })}
+      >
         {isSearchActive ? (
           filteredFolders.length === 0 && filteredNotes.length === 0 ? (
             <p className="text-sm text-gray-500 px-2 py-4 text-center">
