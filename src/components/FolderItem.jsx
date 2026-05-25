@@ -15,10 +15,14 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
     cancelRename,
     addNoteToFolder,
     openContextMenu,
+    multiSelectedIds,
+    toggleMultiSelect,
+    setSingleMultiSelection,
   } = useNotes()
 
   const isExpanded = forceExpanded || !folder.collapsed
   const isSelected = selectedFolderId === folder.id
+  const isMultiSelected = multiSelectedIds.includes(folder.id)
   const editing = renameTarget?.type === 'folder' && renameTarget?.id === folder.id
   const [editValue, setEditValue] = useState(folder.name)
   const inputRef = useRef(null)
@@ -48,7 +52,12 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
     }
   }
 
-  function handleToggle() {
+  function handleHeaderClick(e) {
+    if (e.ctrlKey || e.metaKey) {
+      toggleMultiSelect({ type: 'folder', id: folder.id, name: folder.name })
+      return
+    }
+    setSingleMultiSelection({ type: 'folder', id: folder.id, name: folder.name })
     if (!forceExpanded) toggleExpanded(folder.id)
     selectFolder(folder.id)
   }
@@ -56,16 +65,18 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
   const headerContent = (
     <div
       className={`group flex items-center gap-1.5 px-3 py-2 rounded text-sm cursor-pointer transition-colors ${
-        isSelected
-          ? 'text-sidebar-fg bg-accent/[0.12] border-l-[3px] border-accent pl-[9px]'
-          : 'text-gray-300 hover:bg-white/[0.04]'
+        isMultiSelected
+          ? 'text-sidebar-fg bg-accent/[0.06] border-l-[3px] border-accent/50 pl-[9px]'
+          : isSelected
+            ? 'text-sidebar-fg bg-accent/[0.12] border-l-[3px] border-accent pl-[9px]'
+            : 'text-gray-300 hover:bg-white/[0.04]'
       }`}
       tabIndex={0}
-      onClick={handleToggle}
+      onClick={handleHeaderClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          handleToggle()
+          handleHeaderClick(e)
         }
         if (!forceExpanded) {
           if (e.key === 'ArrowRight' && !isExpanded) toggleExpanded(folder.id)

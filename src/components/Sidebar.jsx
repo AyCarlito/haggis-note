@@ -5,9 +5,10 @@ import FolderItem from './FolderItem'
 import NoteItem from './NoteItem'
 import SearchBar from './SearchBar'
 import SearchNoteItem from './SearchNoteItem'
+import BulkActionBar from './BulkActionBar'
 
 export default function Sidebar() {
-  const { folders, rootNotes, moveNote, moveFolder, selectNote, selectFolder, selectedNoteId, openContextMenu } = useNotes()
+  const { folders, rootNotes, moveNote, moveFolder, selectNote, selectFolder, selectedNoteId, openContextMenu, isMultiSelecting, multiSelectedIds, clearMultiSelection } = useNotes()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [searchNoteFolderId, setSearchNoteFolderId] = useState(null)
@@ -93,7 +94,12 @@ export default function Sidebar() {
 
       <div
         className="flex-1 overflow-y-auto px-2 pb-2 sidebar-scroll"
-        onClick={(e) => { if (e.target === e.currentTarget) selectFolder(null) }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            selectFolder(null)
+            clearMultiSelection()
+          }
+        }}
         onContextMenu={(e) => openContextMenu(e, { type: 'area' })}
       >
         {isSearchActive ? (
@@ -128,6 +134,28 @@ export default function Sidebar() {
               <p className="text-sm text-gray-500 px-2 py-4 text-center">
                 No folders yet. Click &quot;+ Folder&quot; to begin.
               </p>
+            ) : isMultiSelecting ? (
+              <>
+                {rootNotes.length > 0 && (
+                  <div className="mb-3">
+                    <div className="px-3 py-1.5 text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                      Unparented
+                    </div>
+                    <div className="min-h-[4px]">
+                      {rootNotes.map((note, i) => (
+                        <NoteItem key={note.id} note={note} folderId={null} index={i} disableDnd />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {folders.length > 0 && (
+                  <div className="space-y-1">
+                    {folders.map((folder, i) => (
+                      <FolderItem key={folder.id} folder={folder} index={i} disableDnd />
+                    ))}
+                  </div>
+                )}
+              </>
             ) : (
               <DragDropContext onDragEnd={handleDragEnd}>
                 {rootNotes.length > 0 && (
@@ -174,6 +202,9 @@ export default function Sidebar() {
           </>
         )}
       </div>
+      {isMultiSelecting && (
+        <BulkActionBar count={multiSelectedIds.length} />
+      )}
     </aside>
   )
 }

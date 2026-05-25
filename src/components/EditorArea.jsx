@@ -12,7 +12,7 @@ import NoteToolbar from './NoteToolbar'
 import haggisLogo from '../assets/haggis.jpg'
 
 export default function EditorArea() {
-  const { selectedNote, updateNoteContent, selectedNoteId } = useNotes()
+  const { selectedNote, updateNoteContent, selectedNoteId, isMultiSelecting } = useNotes()
   const prevNoteIdRef = useRef(null)
 
   const editor = useEditor({
@@ -67,6 +67,19 @@ export default function EditorArea() {
       }
     }
   }, [editor, selectedNote])
+
+  if (isMultiSelecting) {
+    return (
+      <main className="flex-1 flex items-center justify-center bg-editor-bg editor-grid text-gray-400">
+        <div className="text-center glass rounded-xl px-10 py-12 border border-white/30 shadow-sm">
+          <p className="text-lg font-medium text-gray-600">Multiple items selected</p>
+          <p className="text-sm mt-1 text-gray-400">
+            Use the sidebar to perform bulk actions.
+          </p>
+        </div>
+      </main>
+    )
+  }
 
   if (!selectedNote) {
     return (

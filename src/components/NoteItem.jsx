@@ -3,8 +3,9 @@ import { Draggable } from '@hello-pangea/dnd'
 import { useNotes } from '../context/NotesContext'
 
 export default function NoteItem({ note, folderId, index, disableDnd = false }) {
-  const { selectedNoteId, selectNote, requestDelete, requestRename, renameTarget, finishRename, cancelRename, openContextMenu } = useNotes()
+  const { selectedNoteId, selectNote, requestDelete, requestRename, renameTarget, finishRename, cancelRename, openContextMenu, multiSelectedIds, toggleMultiSelect, setSingleMultiSelection } = useNotes()
   const isSelected = selectedNoteId === note.id
+  const isMultiSelected = multiSelectedIds.includes(note.id)
   const editing = renameTarget?.type === 'note' && renameTarget?.id === note.id
   const [editValue, setEditValue] = useState(note.name)
   const inputRef = useRef(null)
@@ -15,6 +16,14 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
       inputRef.current?.select()
     }
   }, [editing])
+
+  function handleClick(e) {
+    if (e.ctrlKey || e.metaKey) {
+      toggleMultiSelect({ type: 'note', id: note.id, name: note.name, folderId })
+    } else {
+      setSingleMultiSelection({ type: 'note', id: note.id, name: note.name, folderId })
+    }
+  }
 
   function handleDoubleClick(e) {
     e.stopPropagation()
@@ -74,14 +83,16 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
     return (
       <div
         className={`group flex items-center gap-1.5 px-3 py-1.5 rounded text-sm cursor-pointer transition-colors ${
-          isSelected
-            ? 'text-sidebar-fg bg-accent/[0.12] border-l-[3px] border-accent pl-[9px]'
-            : 'text-gray-300 hover:bg-white/[0.04]'
+          isMultiSelected
+            ? 'text-sidebar-fg bg-accent/[0.06] border-l-[3px] border-accent/50 pl-[9px]'
+            : isSelected
+              ? 'text-sidebar-fg bg-accent/[0.12] border-l-[3px] border-accent pl-[9px]'
+              : 'text-gray-300 hover:bg-white/[0.04]'
         }`}
         role="treeitem"
         aria-selected={isSelected}
         tabIndex={0}
-        onClick={() => selectNote(folderId, note.id)}
+        onClick={handleClick}
         onContextMenu={(e) => openContextMenu(e, { type: 'note', id: note.id, name: note.name, folderId })}
         onKeyDown={(e) => {
           if (e.key === 'Enter') selectNote(folderId, note.id)
@@ -110,7 +121,7 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
           role="treeitem"
           aria-selected={isSelected}
           tabIndex={0}
-          onClick={() => selectNote(folderId, note.id)}
+          onClick={handleClick}
           onContextMenu={(e) => openContextMenu(e, { type: 'note', id: note.id, name: note.name, folderId })}
           onKeyDown={(e) => {
             if (e.key === 'Enter') selectNote(folderId, note.id)

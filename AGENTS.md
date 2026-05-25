@@ -88,6 +88,23 @@ Folders are also Draggable for reordering. The folder list has a `Droppable` wit
 
 `moveNote` uses `'__root__'` as a sentinel `droppableId` to transfer notes between the unparented notes array and folders.
 
+## Multi-Select (Bulk Delete)
+
+Multi-select state lives in `NotesContext` (`multiSelectedIds: string[]`, `isMultiSelecting`, `toggleMultiSelect`, `setSingleMultiSelection`, `clearMultiSelection`, `requestBulkDelete`).
+
+`isMultiSelecting` is `multiSelectedIds.length > 1` — single items are treated as normal selection.
+
+`bulkDeleteItems(ids)` resolves selected folder contents to collect all note IDs (notes inside selected folders + individually selected notes), then does a single `updateData` pass removing them.
+
+**Interaction:**
+- **Ctrl/Cmd+Click note/folder**: toggle in `multiSelectedIds` via `toggleMultiSelect`; sets as primary selection when adding; falls back to first remaining item when removing the primary
+- **Regular click**: `setSingleMultiSelection(target)` sets `multiSelectedIds` to exactly `[target.id]` and updates primary selection — single-item mode
+- **Empty sidebar click**: calls `clearMultiSelection()`
+- DnD is disabled while multi-selecting (no `DragDropContext`)
+- Editor shows "Multiple items selected" blank state when `isMultiSelecting` is true
+
+**BulkActionBar** (`src/components/BulkActionBar.jsx`) pinned below the sidebar scroll area, shows selected count + Delete button.
+
 ## Search
 
 Search state is **local to `Sidebar.jsx`** (`searchQuery`, `searchNoteFolderId` — not in `NotesContext`).

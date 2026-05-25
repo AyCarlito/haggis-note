@@ -31,9 +31,11 @@ export default function DeleteConfirmDialog() {
   if (!deleteTarget) return null
 
   const label =
-    deleteTarget.type === 'folder'
-      ? `Delete folder "${deleteTarget.name}" and all its notes?`
-      : `Delete note "${deleteTarget.name}"?`
+    deleteTarget.type === 'bulk-items'
+      ? `Delete ${deleteTarget.count} selected items?`
+      : deleteTarget.type === 'folder'
+        ? `Delete folder "${deleteTarget.name}" and all its notes?`
+        : `Delete note "${deleteTarget.name}"?`
 
   return (
     <div

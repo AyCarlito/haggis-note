@@ -16,6 +16,7 @@ export function NotesProvider({ children, data, updateData }) {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [renameTarget, setRenameTarget] = useState(null)
   const [contextMenu, setContextMenu] = useState(null)
+  const [multiSelectedIds, setMultiSelectedIds] = useState([])
 
   // Holds the current screen-reader announcement string. Cleared after 3s so
   // repeated identical announcements re-trigger the aria-live region in App.jsx.
@@ -40,6 +41,8 @@ export function NotesProvider({ children, data, updateData }) {
     return rootNotes.find((n) => n.id === selectedNoteId) ?? null
   }, [folders, rootNotes, selectedFolderId, selectedNoteId])
 
+  const isMultiSelecting = multiSelectedIds.length > 1
+
   const selectFolder = useCallback((folderId) => {
     setSelectedFolderId(folderId)
     setSelectedNoteId(null)
@@ -49,6 +52,88 @@ export function NotesProvider({ children, data, updateData }) {
     setSelectedFolderId(folderId)
     setSelectedNoteId(noteId)
   }, [])
+
+  const toggleMultiSelect = useCallback((target) => {
+    const isRemoving = multiSelectedIds.includes(target.id)
+    const nextMulti = isRemoving
+      ? multiSelectedIds.filter((id) => id !== target.id)
+      : [...multiSelectedIds, target.id]
+
+    setMultiSelectedIds(nextMulti)
+
+    if (isRemoving) {
+      if (target.type === 'note' && selectedNoteId === target.id) {
+        setSelectedNoteId(nextMulti.length > 0 ? nextMulti[0] : null)
+      } else if (target.type === 'folder' && selectedFolderId === target.id) {
+        setSelectedFolderId(nextMulti.length > 0 ? nextMulti[0] : null)
+        if (nextMulti.length === 0) setSelectedNoteId(null)
+      }
+    } else {
+      if (target.type === 'note') {
+        setSelectedNoteId(target.id)
+        setSelectedFolderId(target.folderId ?? null)
+      } else if (target.type === 'folder') {
+        setSelectedFolderId(target.id)
+        setSelectedNoteId(null)
+      }
+    }
+  }, [multiSelectedIds, selectedNoteId, selectedFolderId])
+
+  const setSingleMultiSelection = useCallback((target) => {
+    setMultiSelectedIds([target.id])
+    if (target.type === 'note') {
+      setSelectedNoteId(target.id)
+      setSelectedFolderId(target.folderId ?? null)
+    } else if (target.type === 'folder') {
+      setSelectedFolderId(target.id)
+      setSelectedNoteId(null)
+    }
+  }, [])
+
+  const clearMultiSelection = useCallback(() => {
+    setMultiSelectedIds([])
+  }, [])
+
+  const requestBulkDelete = useCallback(() => {
+    if (multiSelectedIds.length === 0) return
+    setDeleteTarget({ type: 'bulk-items', ids: multiSelectedIds, count: multiSelectedIds.length })
+  }, [multiSelectedIds])
+
+  const bulkDeleteItems = useCallback((ids) => {
+    updateData((prev) => {
+      const idSet = new Set(ids)
+      const folderIds = prev.folders.filter((f) => idSet.has(f.id)).map((f) => f.id)
+      const folderIdSet = new Set(folderIds)
+      const noteIds = new Set()
+
+      for (const folder of prev.folders) {
+        if (folderIdSet.has(folder.id)) {
+          for (const note of folder.notes) noteIds.add(note.id)
+        } else {
+          for (const note of folder.notes) {
+            if (idSet.has(note.id)) noteIds.add(note.id)
+          }
+        }
+      }
+      for (const note of prev.notes ?? []) {
+        if (idSet.has(note.id)) noteIds.add(note.id)
+      }
+
+      return {
+        ...prev,
+        folders: prev.folders
+          .filter((f) => !folderIdSet.has(f.id))
+          .map((f) => ({ ...f, notes: f.notes.filter((n) => !noteIds.has(n.id)) })),
+        notes: (prev.notes ?? []).filter((n) => !noteIds.has(n.id)),
+      }
+    })
+
+    setSelectedNoteId((current) => (current && ids.includes(current) ? null : current))
+    setSelectedFolderId((current) => (current && ids.includes(current) ? null : current))
+    setMultiSelectedIds([])
+    setDeleteTarget(null)
+    announce(`Deleted ${ids.length} items`)
+  }, [updateData, announce])
 
   // Persists folder collapse state in localStorage (via updateData) so
   // expanded/collapsed survives page reloads. Previously this used an
@@ -245,10 +330,16 @@ export function NotesProvider({ children, data, updateData }) {
   // deleteTarget.name is still in the closure (setDeleteTarget runs async).
   const confirmDelete = useCallback(() => {
     if (!deleteTarget) return
-    if (deleteTarget.type === 'folder') deleteFolder(deleteTarget.id)
-    else deleteNote(deleteTarget.id)
-    announce(`Deleted ${deleteTarget.type} "${deleteTarget.name}"`)
-  }, [deleteTarget, deleteFolder, deleteNote, announce])
+    if (deleteTarget.type === 'folder') {
+      deleteFolder(deleteTarget.id)
+      announce(`Deleted folder "${deleteTarget.name}"`)
+    } else if (deleteTarget.type === 'note') {
+      deleteNote(deleteTarget.id)
+      announce(`Deleted note "${deleteTarget.name}"`)
+    } else if (deleteTarget.type === 'bulk-items') {
+      bulkDeleteItems(deleteTarget.ids)
+    }
+  }, [deleteTarget, deleteFolder, deleteNote, bulkDeleteItems, announce])
 
   const requestRename = useCallback((target) => {
     setRenameTarget(target)
@@ -316,6 +407,12 @@ export function NotesProvider({ children, data, updateData }) {
       contextMenu,
       openContextMenu,
       closeContextMenu,
+      multiSelectedIds,
+      isMultiSelecting,
+      toggleMultiSelect,
+      setSingleMultiSelection,
+      clearMultiSelection,
+      requestBulkDelete,
     }),
     [
       folders,
@@ -328,6 +425,8 @@ export function NotesProvider({ children, data, updateData }) {
       renameTarget,
       firstFolderId,
       contextMenu,
+      multiSelectedIds,
+      isMultiSelecting,
     ],
   )
   /* eslint-enable react-hooks/exhaustive-deps */
