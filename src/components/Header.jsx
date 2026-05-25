@@ -8,7 +8,7 @@ export default function Header({ sidebarOpen, onToggleSidebar }) {
   const [showHelp, setShowHelp] = useState(false)
 
   return (
-    <header className="flex items-center justify-between h-14 px-4 shrink-0 bg-gradient-to-r from-[#232544] via-[#2a2b4e] to-[#232544] text-sidebar-fg border-b border-sidebar-border">
+    <header className="flex items-center justify-between h-14 px-4 shrink-0 relative z-40 bg-gradient-to-r from-[#232544] via-[#2a2b4e] to-[#232544] text-sidebar-fg border-b border-sidebar-border">
       <div className="flex items-center gap-2.5">
         {onToggleSidebar && (
           <button
@@ -29,14 +29,14 @@ export default function Header({ sidebarOpen, onToggleSidebar }) {
       <div className="flex items-center gap-2">
         <button
           onClick={addNote}
-          className="px-4 py-1.5 text-sm rounded-full bg-accent/90 text-white hover:bg-accent-hover transition-colors shadow-sm"
+          className="px-4 max-md:px-2 py-1.5 max-md:py-1 text-sm max-md:text-xs rounded-full bg-accent/90 text-white hover:bg-accent-hover transition-colors shadow-sm"
           aria-label="New note"
         >
           + Note
         </button>
         <button
           onClick={addFolder}
-          className="px-4 py-1.5 text-sm rounded-full border border-white/10 bg-white/5 text-sidebar-fg hover:bg-white/10 transition-colors"
+          className="px-4 max-md:px-2 py-1.5 max-md:py-1 text-sm max-md:text-xs rounded-full border border-white/10 bg-white/5 text-sidebar-fg hover:bg-white/10 transition-colors"
           aria-label="New folder"
         >
           + Folder
