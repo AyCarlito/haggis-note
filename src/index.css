@@ -50,6 +50,10 @@ body {
   cursor: pointer;
 }
 
+.ProseMirror a[href^="note://"] {
+  text-decoration-style: dashed;
+}
+
 .ProseMirror p:first-child:last-child:has(> br.ProseMirror-trailingBreak)::before {
   color: #9ca3af;
   content: 'Start typing…';

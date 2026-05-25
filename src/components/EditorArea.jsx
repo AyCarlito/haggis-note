@@ -12,7 +12,7 @@ import NoteToolbar from './NoteToolbar'
 import haggisLogo from '../assets/haggis.jpg'
 
 export default function EditorArea() {
-  const { selectedNote, updateNoteContent, selectedNoteId, isMultiSelecting } = useNotes()
+  const { selectedNote, updateNoteContent, selectedNoteId, isMultiSelecting, navigateToNote } = useNotes()
   const prevNoteIdRef = useRef(null)
 
   const editor = useEditor({
@@ -27,6 +27,7 @@ export default function EditorArea() {
       FontSize,
       Link.configure({
         openOnClick: false,
+        protocols: [{ scheme: 'note', optionalSlashes: true }],
         HTMLAttributes: { rel: 'noopener noreferrer', target: '_blank' },
       }),
     ],
@@ -46,6 +47,21 @@ export default function EditorArea() {
             editor.chain().decreaseFontSize().focus().run()
           }
           return true
+        }
+        return false
+      },
+      handleClick: (_view, _pos, event) => {
+        const el = event.target.nodeType === Node.ELEMENT_NODE
+          ? event.target
+          : event.target.parentElement
+        const anchor = el?.closest('a')
+        if (anchor) {
+          const href = anchor.getAttribute('href')
+          if (href?.startsWith('note://')) {
+            const noteId = href.slice('note://'.length)
+            navigateToNote(noteId)
+            return true
+          }
         }
         return false
       },

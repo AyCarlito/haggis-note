@@ -41,6 +41,19 @@ export function NotesProvider({ children, data, updateData }) {
     return rootNotes.find((n) => n.id === selectedNoteId) ?? null
   }, [folders, rootNotes, selectedFolderId, selectedNoteId])
 
+  const allNotes = useMemo(() => {
+    const notes = []
+    for (const folder of folders) {
+      for (const note of folder.notes) {
+        notes.push({ id: note.id, name: note.name, folderId: folder.id, folderName: folder.name })
+      }
+    }
+    for (const note of rootNotes) {
+      notes.push({ id: note.id, name: note.name, folderId: null, folderName: null })
+    }
+    return notes
+  }, [folders, rootNotes])
+
   const isMultiSelecting = multiSelectedIds.length > 1
 
   const selectFolder = useCallback((folderId) => {
@@ -52,6 +65,18 @@ export function NotesProvider({ children, data, updateData }) {
     setSelectedFolderId(folderId)
     setSelectedNoteId(noteId)
   }, [])
+
+  const navigateToNote = useCallback((noteId) => {
+    for (const folder of folders) {
+      if (folder.notes.some((n) => n.id === noteId)) {
+        selectNote(folder.id, noteId)
+        return
+      }
+    }
+    if (rootNotes.some((n) => n.id === noteId)) {
+      selectNote(null, noteId)
+    }
+  }, [folders, rootNotes, selectNote])
 
   const toggleMultiSelect = useCallback((target) => {
     const isRemoving = multiSelectedIds.includes(target.id)
@@ -377,10 +402,12 @@ export function NotesProvider({ children, data, updateData }) {
     () => ({
       folders,
       rootNotes,
+      allNotes,
       selectedFolderId,
       selectedNoteId,
       selectedNote,
       announcement,
+      navigateToNote,
       deleteTarget,
       renameTarget,
       firstFolderId,
@@ -417,6 +444,7 @@ export function NotesProvider({ children, data, updateData }) {
     [
       folders,
       rootNotes,
+      allNotes,
       selectedFolderId,
       selectedNoteId,
       selectedNote,
@@ -427,6 +455,7 @@ export function NotesProvider({ children, data, updateData }) {
       contextMenu,
       multiSelectedIds,
       isMultiSelecting,
+      navigateToNote,
     ],
   )
   /* eslint-enable react-hooks/exhaustive-deps */

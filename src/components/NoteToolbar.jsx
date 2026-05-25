@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { FONT_SIZES } from '../extensions/FontSize'
+import { useNotes } from '../context/NotesContext'
 
 const FONT_FAMILIES = ['sans-serif', 'serif', 'monospace', 'Arial', 'Georgia', 'Courier New', 'Times New Roman']
 
@@ -41,10 +42,28 @@ function LinkIcon() {
 }
 
 export default function NoteToolbar({ editor }) {
+  const { allNotes } = useNotes()
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
+  const [noteSearchQuery, setNoteSearchQuery] = useState('')
+  const [noteSearchFocusedIndex, setNoteSearchFocusedIndex] = useState(-1)
   const inputRef = useRef(null)
   const popupRef = useRef(null)
+  const noteSearchInputRef = useRef(null)
+
+  const noteSearchResults = useMemo(() => {
+    const q = noteSearchQuery.toLowerCase().trim()
+    if (!q) return []
+    return allNotes
+      .filter((n) => n.name.toLowerCase().includes(q))
+      .slice(0, 5)
+  }, [allNotes, noteSearchQuery])
+
+  const linkedNote = useMemo(() => {
+    if (!linkUrl.startsWith('note://')) return null
+    const noteId = linkUrl.slice('note://'.length)
+    return allNotes.find((n) => n.id === noteId) ?? null
+  }, [allNotes, linkUrl])
 
   const handleGlobalMouseDown = useCallback((e) => {
     if (popupRef.current && !popupRef.current.contains(e.target)) {
@@ -78,15 +97,23 @@ export default function NoteToolbar({ editor }) {
 
   function openLinkInput() {
     setLinkUrl(currentHref || '')
+    setNoteSearchQuery('')
+    setNoteSearchFocusedIndex(-1)
     setShowLinkInput(true)
   }
 
   function applyLink() {
     const trimmed = linkUrl.trim()
-    if (trimmed) {
-      editor.chain().focus().setLink({ href: trimmed }).run()
-    }
+    if (!trimmed) return
+    editor.chain().focus().setLink({ href: trimmed }).run()
     setShowLinkInput(false)
+  }
+
+  function selectNoteLink(note) {
+    setLinkUrl(`note://${note.id}`)
+    setNoteSearchQuery('')
+    setNoteSearchFocusedIndex(-1)
+    noteSearchInputRef.current?.focus()
   }
 
   function removeLink() {
@@ -96,6 +123,32 @@ export default function NoteToolbar({ editor }) {
 
   function cancelLink() {
     setShowLinkInput(false)
+  }
+
+  function handleNoteSearchKeyDown(e) {
+    if (noteSearchResults.length === 0) return
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setNoteSearchFocusedIndex((prev) =>
+        prev < noteSearchResults.length - 1 ? prev + 1 : 0,
+      )
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setNoteSearchFocusedIndex((prev) =>
+        prev > 0 ? prev - 1 : noteSearchResults.length - 1,
+      )
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      const idx = noteSearchFocusedIndex >= 0 ? noteSearchFocusedIndex : 0
+      if (noteSearchResults[idx]) selectNoteLink(noteSearchResults[idx])
+    } else if (e.key === 'Escape') {
+      cancelLink()
+    }
+  }
+
+  function handleNoteSearchBlur() {
+    setNoteSearchFocusedIndex(-1)
   }
 
   return (
@@ -212,6 +265,55 @@ export default function NoteToolbar({ editor }) {
             placeholder="https://example.com"
             className="w-full px-2.5 py-1.5 text-sm border border-white/30 rounded-lg bg-white text-gray-800 placeholder-gray-400 outline-none focus:border-accent transition-colors"
           />
+
+          {linkedNote && (
+            <div className="mt-1 text-xs text-accent">
+              {'\u2192'} {linkedNote.name}
+              {linkedNote.folderName && <span className="text-gray-400">{' \u00b7 '}{linkedNote.folderName}</span>}
+            </div>
+          )}
+
+          <div className="mt-2 border-t border-white/20 pt-2">
+            <label className="block text-xs text-gray-500 mb-1">Link to note</label>
+            <input
+              ref={noteSearchInputRef}
+              type="text"
+              value={noteSearchQuery}
+              onChange={(e) => {
+                setNoteSearchQuery(e.target.value)
+                setNoteSearchFocusedIndex(-1)
+              }}
+              onKeyDown={handleNoteSearchKeyDown}
+              onBlur={handleNoteSearchBlur}
+              placeholder="Search notes..."
+              className="w-full px-2.5 py-1.5 text-sm border border-white/30 rounded-lg bg-white text-gray-800 placeholder-gray-400 outline-none focus:border-accent transition-colors"
+            />
+            {noteSearchResults.length > 0 && (
+              <div className="mt-1 max-h-40 overflow-y-auto border border-white/20 rounded-lg bg-white/90">
+                {noteSearchResults.map((note, i) => (
+                  <button
+                    key={note.id}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      selectNoteLink(note)
+                    }}
+                    onMouseEnter={() => setNoteSearchFocusedIndex(i)}
+                    className={`w-full text-left px-2.5 py-1.5 text-sm transition-colors ${
+                      i === noteSearchFocusedIndex
+                        ? 'bg-accent/10 text-accent'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span className="font-medium">{note.name}</span>
+                    <span className="text-gray-400 text-xs ml-1.5">
+                      {note.folderName ?? 'Unparented'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-2 mt-2">
             <button
               onClick={applyLink}
