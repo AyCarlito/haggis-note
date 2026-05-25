@@ -25,7 +25,7 @@ export default function HelpDialog({ onClose }) {
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="glass rounded-xl p-6 max-w-lg w-full mx-4 border border-white/20 shadow-xl outline-none"
+        className="bg-white rounded-xl p-6 max-w-lg w-full mx-4 border border-gray-200 shadow-xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
