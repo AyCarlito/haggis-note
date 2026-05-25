@@ -8,7 +8,7 @@ function uid() {
 }
 
 export function NotesProvider({ children, data, updateData }) {
-  const folders = data?.folders ?? []
+  const folders = useMemo(() => data?.folders ?? [], [data])
 
   const [selectedFolderId, setSelectedFolderId] = useState(null)
   const [selectedNoteId, setSelectedNoteId] = useState(null)
@@ -215,6 +215,8 @@ export function NotesProvider({ children, data, updateData }) {
 
   const firstFolderId = folders[0]?.id ?? null
 
+  // Callbacks intentionally omitted from deps per React convention (stable via useCallback)
+  /* eslint-disable react-hooks/exhaustive-deps */
   const value = useMemo(
     () => ({
       folders,
@@ -256,10 +258,12 @@ export function NotesProvider({ children, data, updateData }) {
       firstFolderId,
     ],
   )
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return <NotesContext.Provider value={value}>{children}</NotesContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useNotes() {
   const ctx = useContext(NotesContext)
   if (!ctx) throw new Error('useNotes must be used within NotesProvider')

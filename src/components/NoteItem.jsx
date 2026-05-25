@@ -5,18 +5,9 @@ import { useNotes } from '../context/NotesContext'
 export default function NoteItem({ note, folderId, index, disableDnd = false }) {
   const { selectedNoteId, selectNote, requestDelete, requestRename, renameTarget, finishRename, cancelRename } = useNotes()
   const isSelected = selectedNoteId === note.id
-  const [editing, setEditing] = useState(false)
+  const editing = renameTarget?.type === 'note' && renameTarget?.id === note.id
   const [editValue, setEditValue] = useState(note.name)
   const inputRef = useRef(null)
-
-  const isRenaming = renameTarget?.type === 'note' && renameTarget?.id === note.id
-
-  useEffect(() => {
-    if (isRenaming) {
-      setEditing(true)
-      setEditValue(note.name)
-    }
-  }, [isRenaming, note.name])
 
   useEffect(() => {
     if (editing) {
@@ -31,7 +22,6 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
   }
 
   function handleBlur() {
-    setEditing(false)
     finishRename(note.id, editValue)
   }
 
@@ -40,7 +30,6 @@ export default function NoteItem({ note, folderId, index, disableDnd = false }) 
       handleBlur()
     } else if (e.key === 'Escape') {
       setEditValue(note.name)
-      setEditing(false)
       cancelRename()
     }
   }

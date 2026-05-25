@@ -7,10 +7,11 @@ export default function StatusBar() {
 
   useEffect(() => {
     if (!selectedNote) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisible(true)
     const timer = setTimeout(() => setVisible(false), 2000)
     return () => clearTimeout(timer)
-  }, [selectedNote?.updatedAt])
+  }, [selectedNote?.updatedAt, selectedNote])
 
   return (
     <footer className="h-7 shrink-0 flex items-center px-4 text-xs text-status-fg glass border-t border-white/20">

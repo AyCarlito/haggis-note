@@ -18,18 +18,9 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
 
   const isExpanded = forceExpanded || !folder.collapsed
   const isSelected = selectedFolderId === folder.id
-  const [editing, setEditing] = useState(false)
+  const editing = renameTarget?.type === 'folder' && renameTarget?.id === folder.id
   const [editValue, setEditValue] = useState(folder.name)
   const inputRef = useRef(null)
-
-  const isRenaming = renameTarget?.type === 'folder' && renameTarget?.id === folder.id
-
-  useEffect(() => {
-    if (isRenaming) {
-      setEditing(true)
-      setEditValue(folder.name)
-    }
-  }, [isRenaming, folder.name])
 
   useEffect(() => {
     if (editing) {
@@ -44,7 +35,6 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
   }
 
   function handleBlur() {
-    setEditing(false)
     finishRename(folder.id, editValue)
   }
 
@@ -53,7 +43,6 @@ export default function FolderItem({ folder, index, forceExpanded = false, disab
       handleBlur()
     } else if (e.key === 'Escape') {
       setEditValue(folder.name)
-      setEditing(false)
       cancelRename()
     }
   }

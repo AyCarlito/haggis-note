@@ -63,17 +63,13 @@ export function useStorage(defaultValue) {
   }, [scheduleSave])
 
   useEffect(() => {
-    checkUsage()
-    try {
-      navigator.storage?.estimate?.().then((estimate) => {
-        if (estimate.usage && estimate.quota) {
-          const pct = estimate.usage / estimate.quota
-          if (pct > 0.9) setIsLow(true)
-        }
-      })
-    } catch {
-    }
-  }, [checkUsage])
+    navigator.storage?.estimate?.().then((estimate) => {
+      if (estimate.usage && estimate.quota) {
+        const pct = estimate.usage / estimate.quota
+        if (pct > 0.9) setIsLow(true)
+      }
+    })
+  }, [])
 
   useEffect(() => {
     return () => {
